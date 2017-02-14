@@ -9,6 +9,7 @@
  *   Codenvy, S.A. - initial API and implementation
  */
 'use strict';
+import {ConfirmDialogService} from '../../../components/service/confirm-dialog/confirm-dialog.service';
 
 /**
  * Controller for a project details
@@ -17,18 +18,19 @@
  */
 export class ProjectDetailsController {
 
+  private confirmDialogService: ConfirmDialogService;
   /**
    * Default constructor that is using resource injection
    * @ngInject for Dependency injection
    */
-  constructor($scope, $log, $route, $location, cheAPI, $mdDialog, cheNotification, lodash, $timeout) {
+  constructor($scope, $log, $route, $location, cheAPI, confirmDialogService, cheNotification, lodash, $timeout) {
     this.$log = $log;
     this.cheNotification = cheNotification;
     this.cheAPI = cheAPI;
-    this.$mdDialog = $mdDialog;
     this.$location = $location;
     this.lodash = lodash;
     this.$timeout = $timeout;
+    this.confirmDialogService =  confirmDialogService;
 
     this.namespace = $route.current.params.namespace;
     this.workspaceName = $route.current.params.workspaceName;
@@ -192,16 +194,9 @@ export class ProjectDetailsController {
     }
   }
 
-  deleteProject(event) {
-    var confirm = this.$mdDialog.confirm()
-      .title('Would you like to delete the project ' + this.projectDetails.name)
-      .content('Please confirm for the project removal.')
-      .ariaLabel('Remove project')
-      .ok('Delete it!')
-      .cancel('Cancel')
-      .clickOutsideToClose(true)
-      .targetEvent(event);
-    this.$mdDialog.show(confirm).then(() => {
+  deleteProject() {
+    let content = 'Would you like to delete the project \'' + this.projectDetails.name + '\' ?';
+    this.confirmDialogService.showConfirmDialog('Remove project', content, 'Delete').then(() => {
       // remove it !
       let promise = this.projectService.remove(this.projectDetails.name);
       promise.then(() => {

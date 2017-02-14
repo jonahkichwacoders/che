@@ -238,7 +238,9 @@ export class WorkspaceDetailsController {
    * @param form {any}
    */
   updateName(form: any): void {
-    this.copyWorkspaceDetails.config.name = this.newName;
+    if (this.copyWorkspaceDetails && this.copyWorkspaceDetails.config) {
+      this.copyWorkspaceDetails.config.name = this.newName;
+    }
 
     this.switchEditMode();
   }
