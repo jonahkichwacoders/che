@@ -36,6 +36,7 @@
         <module>plugin-java-debugger</module>
         <module>plugin-keybinding-eclipse</module>
         <module>plugin-maven</module>
+        <module>plugin-dsp</module>
         <module>plugin-gdb</module>
         <module>plugin-sdk</module>
         <module>plugin-orion</module>

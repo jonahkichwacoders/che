@@ -4,6 +4,14 @@ $config.inherits: { module |     <inherits name="$module$"/>
 }$
     <stylesheet src="$config.stylesheet$"/>
     <entry-point class="$config.entryPoint$"/>
+
+    <!-- Tell Che to only build one type of browser JavaScript -->
+    <!-- Values can be 'safari' or 'firefox'.  Safari builds for chrome -->
+    <!-- <set-property name="user.agent" value="safari"/> -->
+
+    <!-- Tell Che to collapse all properties, YMMV if you are depending on any of the properties -->
+	<!-- <collapse-all-properties />     -->
+
 $if(config.loggingEnabled)$
     <inherits name="com.google.gwt.logging.Logging"/>
     <!-- Disable logging to the server -->
