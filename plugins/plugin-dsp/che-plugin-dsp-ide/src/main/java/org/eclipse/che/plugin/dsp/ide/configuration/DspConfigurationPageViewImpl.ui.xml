@@ -1,0 +1,32 @@
+<!--
+
+    Copyright (c) 2017 Kichwa Coders Ltd.
+    All rights reserved. This program and the accompanying materials
+    are made available under the terms of the Eclipse Public License v1.0
+    which accompanies this distribution, and is available at
+    http://www.eclipse.org/legal/epl-v10.html
+
+    Contributors:
+      Kichwa Coders Ltd. - initial API and implementation
+
+-->
+<ui:UiBinder xmlns:ui='urn:ui:com.google.gwt.uibinder'
+             xmlns:g='urn:import:com.google.gwt.user.client.ui'
+             xmlns:che='urn:import:org.eclipse.che.ide.ui.listbox'>
+    <ui:with field='locale' type='org.eclipse.che.plugin.dsp.ide.DspLocalizationConstant'/>
+
+    <g:FlowPanel debugId="dspDebugConfigurationPageView-mainPanel">
+        <g:RadioButton ui:field="launch" name="mode" text="{locale.dspConfigurationPageModeLaunchLabel}"/>
+        <g:RadioButton ui:field="attach" name="mode" text="{locale.dspConfigurationPageModeAttachLabel}"/>
+        <g:Label ui:field="commandLabel" text="{locale.dspConfigurationPageViewCommandLabel}"/>
+        <g:TextBox ui:field="command"/>
+        <g:Label ui:field="argumentsLabel" text="{locale.dspConfigurationPageViewArgumentsLabel}"/>
+        <g:TextBox ui:field="arguments"/>
+        <g:Label ui:field="serverHostLabel" text="{locale.dspConfigurationPageViewServerHostLabel}"/>
+        <g:TextBox ui:field="serverHost"/>
+        <g:Label ui:field="serverPortLabel" text="{locale.dspConfigurationPageViewServerPortLabel}"/>
+        <g:TextBox ui:field="serverPort"/>
+        <g:Label text="{locale.dspConfigurationPageViewParametersLabel}"/>
+        <g:TextArea ui:field="parameters"/>
+    </g:FlowPanel>
+</ui:UiBinder>
