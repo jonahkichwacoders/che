@@ -58,9 +58,13 @@ public class DebuggerManager implements DebuggerManagerObservable {
       for (DebuggerManagerObserver observer : observers) {
         activeDebugger.removeObserver(observer);
       }
+      activeDebugger.setDebugContext(-1, -1);
     }
 
     activeDebugger = debugger;
+    if (activeDebugger != null) {
+      activeDebugger.setDebugContext(-1, -1);
+    }
 
     for (DebuggerManagerObserver observer : observers) {
       if (activeDebugger != null) {

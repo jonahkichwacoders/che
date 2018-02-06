@@ -52,4 +52,6 @@ public interface DebuggerObserver {
 
   /** Event happens when value changed. */
   void onValueChanged(Variable variable, long threadId, int frameIndex);
+
+  void onDebugContextChanged();
 }

@@ -178,7 +178,14 @@ public class SubPanelViewImpl extends Composite
   public void splitHorizontally(SubPanelView subPanelView) {
     southSubPanels.add(0, subPanelView);
 
-    final int height = mainPanel.getOffsetHeight() / 2;
+    final double newPanelWidth = 0.5;
+    splitHorizontally(subPanelView, newPanelWidth);
+  }
+
+  @Override
+  public void splitHorizontally(SubPanelView subPanelView, double newPanelWidthRatio) {
+    newPanelWidthRatio = Math.max(Math.min(newPanelWidthRatio, 0.9), 0.1);
+    final int height = (int) (mainPanel.getOffsetHeight() * newPanelWidthRatio);
 
     splitLayoutPanel.remove(mainPanel);
     splitLayoutPanel.addSouth(subPanelView, height);
@@ -191,7 +198,14 @@ public class SubPanelViewImpl extends Composite
   public void splitVertically(SubPanelView subPanelView) {
     eastSubPanels.add(0, subPanelView);
 
-    final int width = mainPanel.getOffsetWidth() / 2;
+    final double newPanelWidth = 0.5;
+    splitVertically(subPanelView, newPanelWidth);
+  }
+
+  @Override
+  public void splitVertically(SubPanelView subPanelView, double newPanelWidthRatio) {
+    newPanelWidthRatio = Math.max(Math.min(newPanelWidthRatio, 0.9), 0.1);
+    final int width = (int) (mainPanel.getOffsetWidth() * newPanelWidthRatio);
 
     splitLayoutPanel.remove(mainPanel);
     splitLayoutPanel.addEast(subPanelView, width);

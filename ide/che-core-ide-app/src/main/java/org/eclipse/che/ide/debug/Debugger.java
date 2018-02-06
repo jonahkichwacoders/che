@@ -130,4 +130,10 @@ public interface Debugger extends DebuggerObservable {
 
   /** Indicates if debugger is in suspended state. */
   boolean isSuspended();
+
+  void setDebugContext(long threadId, int frameIndex);
+
+  long getDebugContextThreadId();
+
+  int getDebugContextFrameIndex();
 }

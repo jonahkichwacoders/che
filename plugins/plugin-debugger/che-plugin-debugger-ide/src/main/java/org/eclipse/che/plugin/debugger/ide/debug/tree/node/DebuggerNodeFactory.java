@@ -11,6 +11,7 @@
 package org.eclipse.che.plugin.debugger.ide.debug.tree.node;
 
 import com.google.inject.assistedinject.Assisted;
+import org.eclipse.che.api.debug.shared.model.Register;
 import org.eclipse.che.api.debug.shared.model.Variable;
 import org.eclipse.che.api.debug.shared.model.WatchExpression;
 
@@ -22,6 +23,8 @@ import org.eclipse.che.api.debug.shared.model.WatchExpression;
 public interface DebuggerNodeFactory {
 
   VariableNode createVariableNode(@Assisted Variable variable);
+
+  RegisterNode createRegisterNode(@Assisted Register register);
 
   WatchExpressionNode createExpressionNode(@Assisted WatchExpression expression);
 }

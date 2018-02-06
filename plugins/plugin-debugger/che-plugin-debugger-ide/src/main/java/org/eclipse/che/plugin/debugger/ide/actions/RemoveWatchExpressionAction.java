@@ -19,7 +19,7 @@ import org.eclipse.che.ide.api.action.AbstractPerspectiveAction;
 import org.eclipse.che.ide.api.action.ActionEvent;
 import org.eclipse.che.plugin.debugger.ide.DebuggerLocalizationConstant;
 import org.eclipse.che.plugin.debugger.ide.DebuggerResources;
-import org.eclipse.che.plugin.debugger.ide.debug.DebuggerPresenter;
+import org.eclipse.che.plugin.debugger.ide.debug.panel.variables.VariablesPanelPresenter;
 
 /**
  * Action allows remove debugger watch expression from debugger tree.
@@ -28,31 +28,33 @@ import org.eclipse.che.plugin.debugger.ide.debug.DebuggerPresenter;
  */
 public class RemoveWatchExpressionAction extends AbstractPerspectiveAction {
 
-  private final DebuggerPresenter debuggerPresenter;
+  private final VariablesPanelPresenter variablesPanelPresenter;
 
   @Inject
   public RemoveWatchExpressionAction(
       DebuggerLocalizationConstant locale,
       DebuggerResources resources,
-      DebuggerPresenter debuggerPresenter) {
+      VariablesPanelPresenter variablesPanelPresenter) {
     super(
         singletonList(PROJECT_PERSPECTIVE_ID),
         locale.removeWatchExpression(),
         locale.removeWatchExpressionDescription(),
         resources.removeWatchExpressionBtn());
-    this.debuggerPresenter = debuggerPresenter;
+    this.variablesPanelPresenter = variablesPanelPresenter;
   }
 
   @Override
   public void actionPerformed(ActionEvent event) {
-    WatchExpression expression = debuggerPresenter.getSelectedWatchExpression();
+    WatchExpression expression = variablesPanelPresenter.getSelectedWatchExpression();
     if (expression != null) {
-      debuggerPresenter.onRemoveExpressionBtnClicked(expression);
+      variablesPanelPresenter.onRemoveExpressionBtnClicked(expression);
     }
   }
 
   @Override
   public void updateInPerspective(ActionEvent event) {
-    event.getPresentation().setEnabled(debuggerPresenter.getSelectedWatchExpression() != null);
+    event
+        .getPresentation()
+        .setEnabled(variablesPanelPresenter.getSelectedWatchExpression() != null);
   }
 }

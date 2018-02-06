@@ -18,9 +18,9 @@ import org.eclipse.che.ide.api.action.AbstractPerspectiveAction;
 import org.eclipse.che.ide.api.action.ActionEvent;
 import org.eclipse.che.plugin.debugger.ide.DebuggerLocalizationConstant;
 import org.eclipse.che.plugin.debugger.ide.DebuggerResources;
-import org.eclipse.che.plugin.debugger.ide.debug.DebuggerPresenter;
 import org.eclipse.che.plugin.debugger.ide.debug.dialogs.changevalue.ChangeValuePresenter;
 import org.eclipse.che.plugin.debugger.ide.debug.dialogs.watch.expression.edit.EditWatchExpressionPresenter;
+import org.eclipse.che.plugin.debugger.ide.debug.panel.variables.VariablesPanelPresenter;
 
 /**
  * Action which allows change value of selected node in the debugger tree.
@@ -31,7 +31,7 @@ import org.eclipse.che.plugin.debugger.ide.debug.dialogs.watch.expression.edit.E
 public class EditDebugVariableAction extends AbstractPerspectiveAction {
 
   private final ChangeValuePresenter changeValuePresenter;
-  private final DebuggerPresenter debuggerPresenter;
+  private final VariablesPanelPresenter variablesPanelPresenter;
   private final EditWatchExpressionPresenter editWatchExpressionPresenter;
 
   @Inject
@@ -40,22 +40,22 @@ public class EditDebugVariableAction extends AbstractPerspectiveAction {
       DebuggerResources resources,
       ChangeValuePresenter changeValuePresenter,
       EditWatchExpressionPresenter editWatchExpressionPresenter,
-      DebuggerPresenter debuggerPresenter) {
+      VariablesPanelPresenter variablesPanelPresenter) {
     super(
         singletonList(PROJECT_PERSPECTIVE_ID),
         locale.editDebugVariable(),
         locale.editDebugVariableDescription(),
         resources.editDebugNode());
     this.changeValuePresenter = changeValuePresenter;
-    this.debuggerPresenter = debuggerPresenter;
+    this.variablesPanelPresenter = variablesPanelPresenter;
     this.editWatchExpressionPresenter = editWatchExpressionPresenter;
   }
 
   @Override
   public void actionPerformed(ActionEvent e) {
-    if (debuggerPresenter.getSelectedWatchExpression() != null) {
+    if (variablesPanelPresenter.getSelectedWatchExpression() != null) {
       editWatchExpressionPresenter.showDialog();
-    } else if (debuggerPresenter.getSelectedVariable() != null) {
+    } else if (variablesPanelPresenter.getSelectedVariable() != null) {
       changeValuePresenter.showDialog();
     }
   }
@@ -65,7 +65,7 @@ public class EditDebugVariableAction extends AbstractPerspectiveAction {
     event
         .getPresentation()
         .setEnabled(
-            debuggerPresenter.getSelectedWatchExpression() != null
-                || debuggerPresenter.getSelectedVariable() != null);
+            variablesPanelPresenter.getSelectedWatchExpression() != null
+                || variablesPanelPresenter.getSelectedVariable() != null);
   }
 }

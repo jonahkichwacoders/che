@@ -32,10 +32,18 @@ public interface SubPanel {
   SubPanelView getView();
 
   /** Split this panel horizontally on two sub-panels. */
-  void splitHorizontally();
+  SubPanel splitHorizontally();
 
-  /** Split this panel vertically on two sub-panels. */
-  void splitVertically();
+  SubPanel splitHorizontally(double newPanelWidthRatio);
+
+  /**
+   * Split this panel vertically on two sub-panels.
+   *
+   * @return
+   */
+  SubPanel splitVertically();
+
+  SubPanel splitVertically(double newPanelWidthRatio);
 
   /**
    * Add the given {@code widget} to this panel.

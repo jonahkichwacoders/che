@@ -80,22 +80,40 @@ public class SubPanelPresenter implements SubPanel, SubPanelView.ActionDelegate 
     return view;
   }
 
-  @Override
-  public void splitHorizontally() {
+  private SubPanel createSubPanel() {
     final SubPanel subPanel = subPanelFactory.newPanel(this);
     subPanel.setFocusListener(focusListener);
     subPanel.setDoubleClickListener(doubleClickListener);
     subPanel.setAddTabButtonClickListener(addTabButtonClickListener);
-    view.splitHorizontally(subPanel.getView());
+    return subPanel;
   }
 
   @Override
-  public void splitVertically() {
-    final SubPanel subPanel = subPanelFactory.newPanel(this);
-    subPanel.setFocusListener(focusListener);
-    subPanel.setDoubleClickListener(doubleClickListener);
-    subPanel.setAddTabButtonClickListener(addTabButtonClickListener);
+  public SubPanel splitHorizontally() {
+    final SubPanel subPanel = createSubPanel();
+    view.splitHorizontally(subPanel.getView());
+    return subPanel;
+  }
+
+  @Override
+  public SubPanel splitHorizontally(double newPanelWidthRatio) {
+    final SubPanel subPanel = createSubPanel();
+    view.splitHorizontally(subPanel.getView(), newPanelWidthRatio);
+    return subPanel;
+  }
+
+  @Override
+  public SubPanel splitVertically() {
+    final SubPanel subPanel = createSubPanel();
     view.splitVertically(subPanel.getView());
+    return subPanel;
+  }
+
+  @Override
+  public SubPanel splitVertically(double newPanelWidthRatio) {
+    final SubPanel subPanel = createSubPanel();
+    view.splitVertically(subPanel.getView(), newPanelWidthRatio);
+    return subPanel;
   }
 
   @Override

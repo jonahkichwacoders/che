@@ -888,4 +888,26 @@ public abstract class AbstractDebugger implements Debugger, DebuggerObservable {
   }
 
   protected abstract DebuggerDescriptor toDescriptor(Map<String, String> connectionProperties);
+
+  private long activeThreadId = -1;
+  private int activeFrameIndex = -1;
+
+  @Override
+  public void setDebugContext(long threadId, int frameIndex) {
+    activeThreadId = threadId;
+    activeFrameIndex = frameIndex;
+    for (DebuggerObserver observer : observers) {
+      observer.onDebugContextChanged();
+    }
+  }
+
+  @Override
+  public long getDebugContextThreadId() {
+    return activeThreadId;
+  }
+
+  @Override
+  public int getDebugContextFrameIndex() {
+    return activeFrameIndex;
+  }
 }

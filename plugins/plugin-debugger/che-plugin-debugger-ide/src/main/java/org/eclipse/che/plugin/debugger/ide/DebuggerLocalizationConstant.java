@@ -297,4 +297,7 @@ public interface DebuggerLocalizationConstant extends com.google.gwt.i18n.client
 
   @Key("action.switch.debugger.displaying.description")
   String switchDebuggerDisplayingDescription();
+
+  @Key("add.debug.panel.menu.header")
+  String addDebugPanelMenuHeader();
 }

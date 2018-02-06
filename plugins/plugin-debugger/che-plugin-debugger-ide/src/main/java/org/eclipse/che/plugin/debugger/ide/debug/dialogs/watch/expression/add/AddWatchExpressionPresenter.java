@@ -15,9 +15,9 @@ import com.google.inject.Singleton;
 import org.eclipse.che.api.debug.shared.model.WatchExpression;
 import org.eclipse.che.api.debug.shared.model.impl.WatchExpressionImpl;
 import org.eclipse.che.plugin.debugger.ide.DebuggerLocalizationConstant;
-import org.eclipse.che.plugin.debugger.ide.debug.DebuggerPresenter;
 import org.eclipse.che.plugin.debugger.ide.debug.dialogs.DebuggerDialogFactory;
 import org.eclipse.che.plugin.debugger.ide.debug.dialogs.common.TextAreaDialogView;
+import org.eclipse.che.plugin.debugger.ide.debug.panel.variables.VariablesPanelPresenter;
 
 /**
  * Presenter to apply expression in the debugger watch list.
@@ -28,20 +28,20 @@ import org.eclipse.che.plugin.debugger.ide.debug.dialogs.common.TextAreaDialogVi
 public class AddWatchExpressionPresenter implements TextAreaDialogView.ActionDelegate {
 
   private final TextAreaDialogView view;
-  private final DebuggerPresenter debuggerPresenter;
+  private final VariablesPanelPresenter variablesPanelPresenter;
 
   @Inject
   public AddWatchExpressionPresenter(
       DebuggerDialogFactory dialogFactory,
       DebuggerLocalizationConstant constant,
-      DebuggerPresenter debuggerPresenter) {
+      VariablesPanelPresenter variablesPanelPresenter) {
     this.view =
         dialogFactory.createTextAreaDialogView(
             constant.addExpressionViewDialogTitle(),
             constant.addExpressionViewSaveButtonTitle(),
             constant.addExpressionViewCancelButtonTitle());
     this.view.setDelegate(this);
-    this.debuggerPresenter = debuggerPresenter;
+    this.variablesPanelPresenter = variablesPanelPresenter;
   }
 
   @Override
@@ -60,7 +60,7 @@ public class AddWatchExpressionPresenter implements TextAreaDialogView.ActionDel
   @Override
   public void onAgreeClicked() {
     WatchExpression expression = new WatchExpressionImpl(view.getValue());
-    debuggerPresenter.onAddExpressionBtnClicked(expression);
+    variablesPanelPresenter.onAddExpressionBtnClicked(expression);
 
     view.close();
   }

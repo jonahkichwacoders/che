@@ -556,4 +556,7 @@ public class BreakpointManagerImpl
   public void removeObserver(BreakpointManagerObserver observer) {
     observers.remove(observer);
   }
+
+  @Override
+  public void onDebugContextChanged() {}
 }

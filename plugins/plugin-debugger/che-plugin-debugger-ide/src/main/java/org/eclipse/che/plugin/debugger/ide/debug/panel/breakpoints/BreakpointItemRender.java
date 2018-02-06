@@ -8,7 +8,7 @@
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
  */
-package org.eclipse.che.plugin.debugger.ide.debug;
+package org.eclipse.che.plugin.debugger.ide.debug.panel.breakpoints;
 
 import static com.google.common.base.Strings.isNullOrEmpty;
 
@@ -28,7 +28,7 @@ import org.eclipse.che.ide.util.dom.Elements;
  * @author Anatolii Bazko
  */
 public class BreakpointItemRender
-    extends SimpleList.ListItemRenderer<DebuggerView.ActiveBreakpointWrapper> {
+    extends SimpleList.ListItemRenderer<BreakpointsPanelView.ActiveBreakpointWrapper> {
 
   private final BreakpointResources breakpointResources;
 
@@ -37,7 +37,8 @@ public class BreakpointItemRender
   }
 
   @Override
-  public void render(Element itemElement, DebuggerView.ActiveBreakpointWrapper breakpointWrapper) {
+  public void render(
+      Element itemElement, BreakpointsPanelView.ActiveBreakpointWrapper breakpointWrapper) {
     Breakpoint breakpoint = breakpointWrapper.getBreakpoint();
     BreakpointConfiguration conf = breakpoint.getBreakpointConfiguration();
     BreakpointResources.Css css = breakpointResources.getCss();

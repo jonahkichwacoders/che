@@ -30,6 +30,7 @@ import org.eclipse.che.plugin.debugger.ide.BaseTest;
 import org.eclipse.che.plugin.debugger.ide.debug.DebuggerPresenter;
 import org.eclipse.che.plugin.debugger.ide.debug.dialogs.DebuggerDialogFactory;
 import org.eclipse.che.plugin.debugger.ide.debug.dialogs.common.TextAreaDialogView;
+import org.eclipse.che.plugin.debugger.ide.debug.panel.variables.VariablesPanelPresenter;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mock;
@@ -45,7 +46,7 @@ public class ChangeValuePresenterTest extends BaseTest {
   private static final String EMPTY_VALUE = "";
   @Mock private TextAreaDialogView view;
   @Mock private DebuggerManager debuggerManager;
-  @Mock private DebuggerPresenter debuggerPresenter;
+  @Mock private VariablesPanelPresenter variablesPanelPresenter;
   @Mock private DebuggerDialogFactory dialogFactory;
 
   private ChangeValuePresenter presenter;
@@ -69,17 +70,17 @@ public class ChangeValuePresenterTest extends BaseTest {
     when(debugger.isSuspended()).thenReturn(true);
 
     presenter =
-        new ChangeValuePresenter(dialogFactory, constants, debuggerManager, debuggerPresenter);
+        new ChangeValuePresenter(dialogFactory, constants, debuggerManager, variablesPanelPresenter);
   }
 
   @Test
   public void shouldShowDialog() throws Exception {
-    when(debuggerPresenter.getSelectedVariable()).thenReturn(variable);
+    when(variablesPanelPresenter.getSelectedVariable()).thenReturn(variable);
     when(variable.getValue()).thenReturn(simpleValueDto);
 
     presenter.showDialog();
 
-    verify(debuggerPresenter).getSelectedVariable();
+    verify(variablesPanelPresenter).getSelectedVariable();
     verify(view).setValueTitle(constants.changeValueViewExpressionFieldTitle(VAR_NAME));
     verify(view).setValue(VAR_VALUE);
     verify(view).focusInValueField();
@@ -115,7 +116,7 @@ public class ChangeValuePresenterTest extends BaseTest {
 
   @Test
   public void testChangeValueRequest() throws Exception {
-    when(debuggerPresenter.getSelectedVariable()).thenReturn(variable);
+    when(variablesPanelPresenter.getSelectedVariable()).thenReturn(variable);
     when(debuggerManager.getActiveDebugger()).thenReturn(debugger);
     when(view.getValue()).thenReturn(VAR_VALUE);
     when(variable.getVariablePath()).thenReturn(variablePathDto);

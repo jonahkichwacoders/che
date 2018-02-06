@@ -29,10 +29,14 @@ public interface SubPanelView extends View<SubPanelView.ActionDelegate> {
    */
   void splitHorizontally(SubPanelView view);
 
+  void splitHorizontally(SubPanelView subPanelView, double newPanelWidthRatio);
+
   /**
    * Split panel vertically on two sub-panels and set the given {@code widget} for additional panel.
    */
   void splitVertically(SubPanelView view);
+
+  void splitVertically(SubPanelView subPanelView, double newPanelWidthRatio);
 
   /**
    * Add the given {@code widget} to this panel.

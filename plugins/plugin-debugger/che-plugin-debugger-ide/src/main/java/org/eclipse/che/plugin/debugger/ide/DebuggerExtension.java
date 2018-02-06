@@ -23,6 +23,7 @@ import org.eclipse.che.ide.api.action.ActionManager;
 import org.eclipse.che.ide.api.action.DefaultActionGroup;
 import org.eclipse.che.ide.api.constraints.Anchor;
 import org.eclipse.che.ide.api.constraints.Constraints;
+import org.eclipse.che.ide.api.debug.DebugPartPresenterManager;
 import org.eclipse.che.ide.api.extension.Extension;
 import org.eclipse.che.ide.api.keybinding.KeyBindingAgent;
 import org.eclipse.che.ide.api.keybinding.KeyBuilder;
@@ -52,6 +53,9 @@ import org.eclipse.che.plugin.debugger.ide.configuration.DebugConfigurationsGrou
 import org.eclipse.che.plugin.debugger.ide.debug.DebuggerPresenter;
 import org.eclipse.che.plugin.debugger.ide.debug.breakpoint.BreakpointActionGroup;
 import org.eclipse.che.plugin.debugger.ide.debug.breakpoint.BreakpointConfigurationAction;
+import org.eclipse.che.plugin.debugger.ide.debug.panel.breakpoints.BreakpointsPanelPresenter;
+import org.eclipse.che.plugin.debugger.ide.debug.panel.context.ContextPanelPresenter;
+import org.eclipse.che.plugin.debugger.ide.debug.panel.variables.VariablesPanelPresenter;
 
 /**
  * Extension allows debug applications.
@@ -87,6 +91,7 @@ public class DebuggerExtension {
   public static final String ENABLE_BREAKPOINT_ID = "enableBreakpoint";
   public static final String DELETE_BREAKPOINT_ID = "deleteBreakpoint";
   public static final String DEBUGGER_DISPLAYING_MODE_ID = "debuggerDisplayingMode";
+  public static final String ADD_DEBUG_VIEW_CONTEXT_MENU = "addDebugViewContextMenu";
 
   public static final String BREAKPOINT = "breakpoint";
 
@@ -119,7 +124,11 @@ public class DebuggerExtension {
       EnableBreakpointAction enableBreakpointAction,
       DisableBreakpointAction disableBreakpointAction,
       DeleteBreakpointAction deleteBreakpointAction,
-      DebuggerDisplayingModeAction debuggerDisplayingModeAction) {
+      DebuggerDisplayingModeAction debuggerDisplayingModeAction,
+      DebugPartPresenterManager debugPartPresenterManager,
+      BreakpointsPanelPresenter breakpointsPanelPresenter,
+      ContextPanelPresenter contextPanelPresenter,
+      VariablesPanelPresenter variablesPanelPresenter) {
     debuggerResources.getCss().ensureInjected();
     breakpointResources.getCss().ensureInjected();
 
@@ -195,7 +204,7 @@ public class DebuggerExtension {
     watchDebuggerActionGroup.add(editDebugVariableAction);
 
     // create watch debugger toolbar action group
-    debuggerPresenter.getWatchExpressionToolbar().bindMainGroup(watchDebuggerActionGroup);
+    variablesPanelPresenter.getWatchExpressionToolbar().bindMainGroup(watchDebuggerActionGroup);
 
     // add actions in 'Debug' context menu
     final DefaultActionGroup debugContextMenuGroup =
@@ -249,5 +258,9 @@ public class DebuggerExtension {
           .getGlobal()
           .addKey(new KeyBuilder().alt().charCode('5').build(), SHOW_HIDE_DEBUGGER_PANEL_ID);
     }
+
+    debugPartPresenterManager.registerDebugPartPresenter(breakpointsPanelPresenter);
+    debugPartPresenterManager.registerDebugPartPresenter(contextPanelPresenter);
+    debugPartPresenterManager.registerDebugPartPresenter(variablesPanelPresenter);
   }
 }

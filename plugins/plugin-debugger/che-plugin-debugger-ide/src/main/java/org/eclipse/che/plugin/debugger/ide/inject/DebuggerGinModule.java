@@ -15,6 +15,7 @@ import com.google.gwt.inject.client.assistedinject.GinFactoryModuleBuilder;
 import com.google.inject.Singleton;
 import org.eclipse.che.ide.api.action.BaseAction;
 import org.eclipse.che.ide.api.debug.DebugConfigurationsManager;
+import org.eclipse.che.ide.api.debug.DebugPartPresenterManager;
 import org.eclipse.che.ide.api.extension.ExtensionGinModule;
 import org.eclipse.che.ide.ui.toolbar.ToolbarPresenter;
 import org.eclipse.che.plugin.debugger.ide.configuration.DebugConfigurationAction;
@@ -22,6 +23,8 @@ import org.eclipse.che.plugin.debugger.ide.configuration.DebugConfigurationActio
 import org.eclipse.che.plugin.debugger.ide.configuration.DebugConfigurationsManagerImpl;
 import org.eclipse.che.plugin.debugger.ide.configuration.EditDebugConfigurationsView;
 import org.eclipse.che.plugin.debugger.ide.configuration.EditDebugConfigurationsViewImpl;
+import org.eclipse.che.plugin.debugger.ide.debug.AddDebugPanelMenuFactory;
+import org.eclipse.che.plugin.debugger.ide.debug.DebugPartPresenterManagerImpl;
 import org.eclipse.che.plugin.debugger.ide.debug.DebuggerToolbar;
 import org.eclipse.che.plugin.debugger.ide.debug.DebuggerView;
 import org.eclipse.che.plugin.debugger.ide.debug.DebuggerViewImpl;
@@ -34,6 +37,12 @@ import org.eclipse.che.plugin.debugger.ide.debug.dialogs.common.TextAreaDialogVi
 import org.eclipse.che.plugin.debugger.ide.debug.dialogs.common.TextAreaDialogViewImpl;
 import org.eclipse.che.plugin.debugger.ide.debug.expression.EvaluateExpressionView;
 import org.eclipse.che.plugin.debugger.ide.debug.expression.EvaluateExpressionViewImpl;
+import org.eclipse.che.plugin.debugger.ide.debug.panel.breakpoints.BreakpointsPanelView;
+import org.eclipse.che.plugin.debugger.ide.debug.panel.breakpoints.BreakpointsPanelViewImpl;
+import org.eclipse.che.plugin.debugger.ide.debug.panel.context.ContextPanelView;
+import org.eclipse.che.plugin.debugger.ide.debug.panel.context.ContextPanelViewImpl;
+import org.eclipse.che.plugin.debugger.ide.debug.panel.variables.VariablesPanelView;
+import org.eclipse.che.plugin.debugger.ide.debug.panel.variables.VariablesPanelViewImpl;
 import org.eclipse.che.plugin.debugger.ide.debug.tree.node.DebuggerNodeFactory;
 
 /**
@@ -68,6 +77,11 @@ public class DebuggerGinModule extends AbstractGinModule {
             .build(DebuggerDialogFactory.class));
     install(new GinFactoryModuleBuilder().build(DebuggerNodeFactory.class));
 
+    bind(BreakpointsPanelView.class).to(BreakpointsPanelViewImpl.class).in(Singleton.class);
+    bind(VariablesPanelView.class).to(VariablesPanelViewImpl.class).in(Singleton.class);
+    bind(ContextPanelView.class).to(ContextPanelViewImpl.class).in(Singleton.class);
+    install(new GinFactoryModuleBuilder().build(AddDebugPanelMenuFactory.class));
+
     bind(ToolbarPresenter.class)
         .annotatedWith(DebuggerWatchToolBar.class)
         .to(ToolbarPresenter.class)
@@ -79,5 +93,9 @@ public class DebuggerGinModule extends AbstractGinModule {
         .in(Singleton.class);
 
     install(new GinFactoryModuleBuilder().build(BreakpointContextMenuFactory.class));
+
+    bind(DebugPartPresenterManager.class)
+        .to(DebugPartPresenterManagerImpl.class)
+        .in(Singleton.class);
   }
 }

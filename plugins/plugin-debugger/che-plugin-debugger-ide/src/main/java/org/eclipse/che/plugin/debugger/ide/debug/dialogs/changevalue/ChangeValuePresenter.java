@@ -18,9 +18,9 @@ import org.eclipse.che.api.debug.shared.model.impl.VariableImpl;
 import org.eclipse.che.ide.debug.Debugger;
 import org.eclipse.che.ide.debug.DebuggerManager;
 import org.eclipse.che.plugin.debugger.ide.DebuggerLocalizationConstant;
-import org.eclipse.che.plugin.debugger.ide.debug.DebuggerPresenter;
 import org.eclipse.che.plugin.debugger.ide.debug.dialogs.DebuggerDialogFactory;
 import org.eclipse.che.plugin.debugger.ide.debug.dialogs.common.TextAreaDialogView;
+import org.eclipse.che.plugin.debugger.ide.debug.panel.variables.VariablesPanelPresenter;
 
 /**
  * Presenter for changing variables value.
@@ -31,7 +31,7 @@ import org.eclipse.che.plugin.debugger.ide.debug.dialogs.common.TextAreaDialogVi
 public class ChangeValuePresenter implements TextAreaDialogView.ActionDelegate {
   private final DebuggerManager debuggerManager;
   private final TextAreaDialogView view;
-  private final DebuggerPresenter debuggerPresenter;
+  private final VariablesPanelPresenter variablesPanelPresenter;
   private final DebuggerLocalizationConstant constant;
   private Variable selectedVariable;
 
@@ -40,20 +40,20 @@ public class ChangeValuePresenter implements TextAreaDialogView.ActionDelegate {
       DebuggerDialogFactory dialogFactory,
       DebuggerLocalizationConstant constant,
       DebuggerManager debuggerManager,
-      DebuggerPresenter debuggerPresenter) {
+      VariablesPanelPresenter variablesPanelPresenter) {
     this.view =
         dialogFactory.createTextAreaDialogView(
             constant.changeValueViewTitle(),
             constant.changeValueViewChangeButtonTitle(),
             constant.changeValueViewCancelButtonTitle());
     this.debuggerManager = debuggerManager;
-    this.debuggerPresenter = debuggerPresenter;
+    this.variablesPanelPresenter = variablesPanelPresenter;
     this.view.setDelegate(this);
     this.constant = constant;
   }
 
   public void showDialog() {
-    this.selectedVariable = debuggerPresenter.getSelectedVariable();
+    this.selectedVariable = variablesPanelPresenter.getSelectedVariable();
     view.setValueTitle(constant.changeValueViewExpressionFieldTitle(selectedVariable.getName()));
     view.setValue(selectedVariable.getValue().getString());
     view.focusInValueField();
@@ -79,8 +79,8 @@ public class ChangeValuePresenter implements TextAreaDialogView.ActionDelegate {
               selectedVariable.isPrimitive(),
               selectedVariable.getVariablePath());
 
-      final long threadId = debuggerPresenter.getSelectedThreadId();
-      final int frameIndex = debuggerPresenter.getSelectedFrameIndex();
+      final long threadId = debugger.getDebugContextThreadId();
+      final int frameIndex = debugger.getDebugContextFrameIndex();
       debugger.setValue(newVariable, threadId, frameIndex);
     }
 

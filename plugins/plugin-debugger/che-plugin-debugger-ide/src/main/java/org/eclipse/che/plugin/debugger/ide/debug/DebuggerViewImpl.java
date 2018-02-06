@@ -10,53 +10,37 @@
  */
 package org.eclipse.che.plugin.debugger.ide.debug;
 
-import static org.eclipse.che.ide.ui.smartTree.SelectionModel.Mode.SINGLE;
-import static org.eclipse.che.ide.ui.smartTree.SortDir.ASC;
-
-import com.google.gwt.event.dom.client.ChangeEvent;
+import com.google.gwt.core.client.Scheduler;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
-import com.google.gwt.uibinder.client.UiHandler;
 import com.google.gwt.user.client.ui.AcceptsOneWidget;
-import com.google.gwt.user.client.ui.FlowPanel;
+import com.google.gwt.user.client.ui.Focusable;
+import com.google.gwt.user.client.ui.IsWidget;
 import com.google.gwt.user.client.ui.Label;
-import com.google.gwt.user.client.ui.ListBox;
-import com.google.gwt.user.client.ui.ScrollPanel;
+import com.google.gwt.user.client.ui.RequiresResize;
 import com.google.gwt.user.client.ui.SimplePanel;
 import com.google.gwt.user.client.ui.SplitLayoutPanel;
 import com.google.gwt.user.client.ui.Widget;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
-import elemental.dom.Element;
-import elemental.html.TableElement;
-import java.util.ArrayList;
-import java.util.List;
-import javax.validation.constraints.NotNull;
-import org.eclipse.che.api.debug.shared.model.Location;
-import org.eclipse.che.api.debug.shared.model.StackFrameDump;
-import org.eclipse.che.api.debug.shared.model.ThreadState;
-import org.eclipse.che.api.debug.shared.model.Variable;
-import org.eclipse.che.api.debug.shared.model.WatchExpression;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.Map;
+import java.util.Map.Entry;
+import java.util.Optional;
 import org.eclipse.che.commons.annotation.Nullable;
 import org.eclipse.che.ide.Resources;
+import org.eclipse.che.ide.api.debug.DebugPartPresenter;
+import org.eclipse.che.ide.api.debug.DebugPartPresenterManager;
 import org.eclipse.che.ide.api.parts.base.BaseView;
-import org.eclipse.che.ide.debug.BreakpointResources;
-import org.eclipse.che.ide.resource.Path;
-import org.eclipse.che.ide.ui.list.SimpleList;
-import org.eclipse.che.ide.ui.smartTree.NodeLoader;
-import org.eclipse.che.ide.ui.smartTree.NodeStorage;
-import org.eclipse.che.ide.ui.smartTree.Tree;
-import org.eclipse.che.ide.ui.smartTree.data.Node;
-import org.eclipse.che.ide.ui.status.StatusText;
-import org.eclipse.che.ide.util.dom.Elements;
+import org.eclipse.che.ide.ui.SplitterFancyUtil;
+import org.eclipse.che.ide.ui.multisplitpanel.SubPanel;
+import org.eclipse.che.ide.ui.multisplitpanel.SubPanelFactory;
+import org.eclipse.che.ide.ui.multisplitpanel.WidgetToShow;
 import org.eclipse.che.plugin.debugger.ide.DebuggerLocalizationConstant;
 import org.eclipse.che.plugin.debugger.ide.DebuggerResources;
-import org.eclipse.che.plugin.debugger.ide.debug.tree.node.DebuggerNodeFactory;
-import org.eclipse.che.plugin.debugger.ide.debug.tree.node.VariableNode;
-import org.eclipse.che.plugin.debugger.ide.debug.tree.node.WatchExpressionNode;
-import org.eclipse.che.plugin.debugger.ide.debug.tree.node.comparator.DebugNodeTypeComparator;
-import org.eclipse.che.plugin.debugger.ide.debug.tree.node.comparator.VariableNodeComparator;
-import org.eclipse.che.plugin.debugger.ide.debug.tree.node.key.DebugNodeUniqueKeyProvider;
+import org.vectomatic.dom.svg.ui.SVGResource;
 
 /**
  * The class business logic which allow us to change visual representation of debugger panel.
@@ -67,15 +51,16 @@ import org.eclipse.che.plugin.debugger.ide.debug.tree.node.key.DebugNodeUniqueKe
  */
 @Singleton
 public class DebuggerViewImpl extends BaseView<DebuggerView.ActionDelegate>
-    implements DebuggerView {
+    implements DebuggerView,
+        SubPanel.FocusListener,
+        SubPanel.DoubleClickListener,
+        SubPanel.AddTabButtonClickListener,
+        RequiresResize {
 
   interface DebuggerViewImplUiBinder extends UiBinder<Widget, DebuggerViewImpl> {}
 
   @UiField Label vmName;
-  @UiField Label executionPoint;
   @UiField SimplePanel toolbarPanel;
-  @UiField ScrollPanel breakpointsPanel;
-  @UiField SimplePanel watchExpressionPanel;
 
   @UiField(provided = true)
   DebuggerLocalizationConstant locale;
@@ -84,21 +69,14 @@ public class DebuggerViewImpl extends BaseView<DebuggerView.ActionDelegate>
   Resources coreRes;
 
   @UiField(provided = true)
-  SplitLayoutPanel splitPanel = new SplitLayoutPanel(3);
+  SplitLayoutPanel splitPanel;
 
-  @UiField(provided = true)
-  Tree tree;
+  private Map<WidgetToShow, SubPanel> widget2Panels;
 
-  @UiField ListBox threads;
-  @UiField ScrollPanel framesPanel;
-  @UiField FlowPanel threadNotSuspendedPlaceHolder;
-
-  private final SimpleList<ActiveBreakpointWrapper> breakpoints;
-  private final SimpleList<StackFrameDump> frames;
-  private final BreakpointResources breakpointResources;
-
-  private final DebuggerNodeFactory nodeFactory;
-  private final DebugNodeUniqueKeyProvider nodeKeyProvider;
+  private SubPanel focusedSubPanel;
+  private Focusable lastFosuced;
+  private SubPanel masterSubPanel;
+  private DebugPartPresenterManager debugPartPresenterManager;
 
   @Inject
   protected DebuggerViewImpl(
@@ -106,175 +84,26 @@ public class DebuggerViewImpl extends BaseView<DebuggerView.ActionDelegate>
       DebuggerLocalizationConstant locale,
       Resources coreRes,
       DebuggerViewImplUiBinder uiBinder,
-      BreakpointResources breakpointResources,
-      DebuggerNodeFactory nodeFactory,
-      DebugNodeUniqueKeyProvider nodeKeyProvider) {
+      SplitterFancyUtil splitterFancyUtil,
+      SubPanelFactory subPanelFactory,
+      DebugPartPresenterManager debugPartPresenterManager) {
     super();
 
     this.locale = locale;
     this.coreRes = coreRes;
-    this.breakpointResources = breakpointResources;
-    this.nodeKeyProvider = nodeKeyProvider;
+    this.debugPartPresenterManager = debugPartPresenterManager;
 
-    StatusText<Tree> emptyTreeStatus = new StatusText<>();
-    emptyTreeStatus.setText("");
-
-    tree = new Tree(new NodeStorage(nodeKeyProvider), new NodeLoader(), emptyTreeStatus);
+    widget2Panels = new HashMap<>();
+    splitPanel = new SplitLayoutPanel(1);
     setContentWidget(uiBinder.createAndBindUi(this));
 
-    this.breakpoints = createBreakpointList();
-    this.breakpointsPanel.add(breakpoints);
-
-    this.frames = createFramesList();
-    this.framesPanel.add(frames);
-    this.nodeFactory = nodeFactory;
-
-    tree.ensureDebugId("debugger-tree");
-
-    tree.getSelectionModel().setSelectionMode(SINGLE);
-
-    tree.addExpandHandler(
-        event -> {
-          Node expandedNode = event.getNode();
-          if (expandedNode instanceof VariableNode) {
-            delegate.onExpandVariable(((VariableNode) expandedNode).getData());
-          }
-        });
-
-    tree.getNodeStorage()
-        .addSortInfo(new NodeStorage.StoreSortInfo(new DebugNodeTypeComparator(), ASC));
-    tree.getNodeStorage()
-        .addSortInfo(new NodeStorage.StoreSortInfo(new VariableNodeComparator(), ASC));
-
-    watchExpressionPanel.addStyleName(resources.getCss().watchExpressionsPanel());
-  }
-
-  @Override
-  public void setExecutionPoint(@Nullable Location location) {
-    StringBuilder labelText = new StringBuilder();
-    if (location != null) {
-      labelText
-          .append(Path.valueOf(location.getTarget()).lastSegment())
-          .append(":")
-          .append(location.getLineNumber());
-    }
-    executionPoint.getElement().addClassName(coreRes.coreCss().defaultFont());
-    executionPoint.setText(labelText.toString());
-  }
-
-  @Override
-  public void removeAllVariables() {
-    for (Node node : tree.getNodeStorage().getAll()) {
-      if (node instanceof VariableNode) {
-        tree.getNodeStorage().remove(node);
-      }
-    }
-  }
-
-  @Override
-  public void setVariables(@NotNull List<? extends Variable> variables) {
-    for (Variable variable : variables) {
-      VariableNode node = nodeFactory.createVariableNode(variable);
-      tree.getNodeStorage().add(node);
-    }
-  }
-
-  @Override
-  public void expandVariable(Variable variable) {
-    String key = nodeKeyProvider.evaluateKey(variable);
-    Node nodeToUpdate = tree.getNodeStorage().findNodeWithKey(key);
-    if (nodeToUpdate != null) {
-      tree.getNodeStorage().update(nodeToUpdate);
-      List<? extends Variable> varChildren = variable.getValue().getVariables();
-      for (int i = 0; i < varChildren.size(); i++) {
-        Node childNode = nodeFactory.createVariableNode(varChildren.get(i));
-        tree.getNodeStorage().insert(nodeToUpdate, i, childNode);
-      }
-    }
-  }
-
-  @Override
-  public void updateVariable(Variable variable) {
-    String key = nodeKeyProvider.evaluateKey(variable);
-    Node nodeToUpdate = tree.getNodeStorage().findNodeWithKey(key);
-    if (nodeToUpdate != null && nodeToUpdate instanceof VariableNode) {
-      VariableNode variableNode = ((VariableNode) nodeToUpdate);
-      variableNode.setData(variable);
-      tree.getNodeStorage().update(variableNode);
-
-      if (tree.isExpanded(nodeToUpdate)) {
-        tree.getNodeLoader().loadChildren(variableNode);
-      } else {
-        tree.refresh(nodeToUpdate);
-      }
-    }
-  }
-
-  @Override
-  public void addExpression(WatchExpression expression) {
-    String key = nodeKeyProvider.evaluateKey(expression);
-    if (tree.getNodeStorage().findNodeWithKey(key) == null) {
-      WatchExpressionNode node = nodeFactory.createExpressionNode(expression);
-      tree.getNodeStorage().add(node);
-    }
-  }
-
-  @Override
-  public void updateExpression(WatchExpression expression) {
-    String key = nodeKeyProvider.evaluateKey(expression);
-    Node nodeToUpdate = tree.getNodeStorage().findNodeWithKey(key);
-    if (nodeToUpdate != null && nodeToUpdate instanceof WatchExpressionNode) {
-      WatchExpressionNode expNode = ((WatchExpressionNode) nodeToUpdate);
-      expNode.setData(expression);
-      tree.getNodeStorage().update(nodeToUpdate);
-      tree.refresh(nodeToUpdate);
-    }
-  }
-
-  @Override
-  public void removeExpression(WatchExpression expression) {
-    String key = nodeKeyProvider.evaluateKey(expression);
-    Node nodeToRemove = tree.getNodeStorage().findNodeWithKey(key);
-    if (nodeToRemove != null) {
-      tree.getNodeStorage().remove(nodeToRemove);
-    }
-  }
-
-  @Override
-  public void setBreakpoints(@NotNull List<ActiveBreakpointWrapper> breakpoints) {
-    this.breakpoints.render(breakpoints);
-  }
-
-  @Override
-  public void setThreadDump(List<? extends ThreadState> threadDump, long threadIdToSelect) {
-    threads.clear();
-
-    for (int i = 0; i < threadDump.size(); i++) {
-      ThreadState ts = threadDump.get(i);
-
-      StringBuilder title = new StringBuilder();
-      title.append("\"");
-      title.append(ts.getName());
-      title.append("\"@");
-      title.append(ts.getId());
-      title.append(" in group \"");
-      title.append(ts.getGroupName());
-      title.append("\": ");
-      title.append(ts.getStatus());
-
-      threads.addItem(title.toString(), String.valueOf(ts.getId()));
-      if (ts.getId() == threadIdToSelect) {
-        threads.setSelectedIndex(i);
-      }
-    }
-  }
-
-  @Override
-  public void setFrames(List<? extends StackFrameDump> stackFrameDumps) {
-    frames.render(new ArrayList<>(stackFrameDumps));
-    if (!stackFrameDumps.isEmpty()) {
-      frames.getSelectionModel().setSelectedItem(0);
-    }
+    masterSubPanel = subPanelFactory.newPanel();
+    masterSubPanel.setFocusListener(this);
+    masterSubPanel.setDoubleClickListener(this);
+    masterSubPanel.setAddTabButtonClickListener(this);
+    splitPanel.add(masterSubPanel.getView());
+    focusedSubPanel = masterSubPanel;
+    splitterFancyUtil.tuneSplitter(splitPanel);
   }
 
   @Override
@@ -283,106 +112,152 @@ public class DebuggerViewImpl extends BaseView<DebuggerView.ActionDelegate>
   }
 
   @Override
-  public Variable getSelectedVariable() {
-    Node selectedNode = getSelectedNode();
-    if (selectedNode instanceof VariableNode) {
-      return ((VariableNode) selectedNode).getData();
-    }
-    return null;
-  }
-
-  @Override
-  public WatchExpression getSelectedExpression() {
-    Node selectedNode = getSelectedNode();
-    if (selectedNode instanceof WatchExpressionNode) {
-      return ((WatchExpressionNode) selectedNode).getData();
-    }
-    return null;
-  }
-
-  private Node getSelectedNode() {
-    if (tree.getSelectionModel().getSelectedNodes().isEmpty()) {
-      return null;
-    }
-    return tree.getSelectionModel().getSelectedNodes().get(0);
-  }
-
-  @Override
   public AcceptsOneWidget getDebuggerToolbarPanel() {
     return toolbarPanel;
   }
 
   @Override
-  public AcceptsOneWidget getDebuggerWatchToolbarPanel() {
-    return watchExpressionPanel;
+  public void addWidget(
+      final String title, final SVGResource icon, final IsWidget widget, final boolean removable) {
+    SubPanel subPanel = focusedSubPanel;
+    addWidget(subPanel, title, icon, widget, removable);
   }
 
-  @Override
-  public long getSelectedThreadId() {
-    String selectedValue = threads.getSelectedValue();
-    return selectedValue == null ? -1 : Integer.parseInt(selectedValue);
-  }
+  private void addWidget(
+      SubPanel subPanel,
+      final String title,
+      final SVGResource icon,
+      final IsWidget widget,
+      final boolean removable) {
+    Optional<WidgetToShow> existingWidgetInSamePanel =
+        subPanel
+            .getAllWidgets()
+            .stream()
+            .filter(widgetToShow -> widgetToShow.getWidget().equals(widget))
+            .findFirst();
 
-  @Override
-  public int getSelectedFrameIndex() {
-    return frames.getSelectionModel().getSelectedIndex();
-  }
+    if (existingWidgetInSamePanel.isPresent()) {
+      subPanel.activateWidget(existingWidgetInSamePanel.get());
+      return;
+    }
 
-  public void setThreadNotSuspendPlaceHolderVisible(boolean visible) {
-    threadNotSuspendedPlaceHolder.setVisible(visible);
-  }
+    Optional<Entry<WidgetToShow, SubPanel>> existingWidgetInAnyPanel =
+        widget2Panels
+            .entrySet()
+            .stream()
+            .filter(e -> e.getKey().getWidget().equals(widget))
+            .findFirst();
+    existingWidgetInAnyPanel.ifPresent(
+        (Entry<WidgetToShow, SubPanel> e) -> {
+          SubPanel panel = e.getValue();
+          WidgetToShow widgetToShow = e.getKey();
+          panel.removeWidget(widgetToShow);
+          widget2Panels.remove(widgetToShow);
+        });
 
-  @UiHandler({"threads"})
-  void onThreadChanged(ChangeEvent event) {
-    delegate.onSelectedThread(Integer.parseInt(threads.getSelectedValue()));
-  }
-
-  private SimpleList<ActiveBreakpointWrapper> createBreakpointList() {
-    TableElement breakPointsElement = Elements.createTableElement();
-    breakPointsElement.setAttribute("style", "width: 100%; border: none;");
-
-    SimpleList.ListEventDelegate<ActiveBreakpointWrapper> breakpointListEventDelegate =
-        new SimpleList.ListEventDelegate<ActiveBreakpointWrapper>() {
-          public void onListItemClicked(Element itemElement, ActiveBreakpointWrapper itemData) {
-            breakpoints.getSelectionModel().setSelectedItem(itemData);
+    final WidgetToShow widgetToShow =
+        new WidgetToShow() {
+          @Override
+          public IsWidget getWidget() {
+            return widget;
           }
 
           @Override
-          public void onListItemContextMenu(
-              int clientX, int clientY, ActiveBreakpointWrapper itemData) {
-            delegate.onBreakpointContextMenu(clientX, clientY, itemData.getBreakpoint());
+          public String getTitle() {
+            return title;
           }
 
           @Override
-          public void onListItemDoubleClicked(
-              Element listItemBase, ActiveBreakpointWrapper itemData) {
-            delegate.onBreakpointDoubleClick(itemData.getBreakpoint());
+          public SVGResource getIcon() {
+            return icon;
           }
         };
 
-    return SimpleList.create(
-        (SimpleList.View) breakPointsElement,
-        coreRes.defaultSimpleListCss(),
-        new BreakpointItemRender(breakpointResources),
-        breakpointListEventDelegate);
+    widget2Panels.put(widgetToShow, subPanel);
+
+    subPanel.addWidget(
+        widgetToShow,
+        removable,
+        new SubPanel.WidgetRemovingListener() {
+          @Override
+          public void onWidgetRemoving(SubPanel.RemoveCallback removeCallback) {
+            removeCallback.remove();
+          }
+        });
+    subPanel.activateWidget(widgetToShow);
   }
 
-  private SimpleList<StackFrameDump> createFramesList() {
-    TableElement frameElement = Elements.createTableElement();
-    frameElement.setAttribute("style", "width: 100%; border: none;");
+  @Override
+  public void focusGained(SubPanel subPanel, IsWidget widget) {
+    focusedSubPanel = subPanel;
 
-    SimpleList.ListEventDelegate<StackFrameDump> frameListEventDelegate =
-        new SimpleList.ListEventDelegate<StackFrameDump>() {
-          public void onListItemClicked(Element itemElement, StackFrameDump itemData) {
-            frames.getSelectionModel().setSelectedItem(itemData);
-            delegate.onSelectedFrame(frames.getSelectionModel().getSelectedIndex());
+    if (lastFosuced != null && !lastFosuced.equals(widget)) {
+      lastFosuced.setFocus(false);
+    }
+
+    if (widget instanceof Focusable) {
+      ((Focusable) widget).setFocus(true);
+
+      lastFosuced = (Focusable) widget;
+    }
+  }
+
+  @Override
+  public void onDoubleClicked(final SubPanel panel, final IsWidget widget) {
+    delegate.onToggleMaximizeDebugPanel();
+  }
+
+  @Override
+  public void onResize() {
+    for (WidgetToShow widgetToShow : widget2Panels.keySet()) {
+      final IsWidget widget = widgetToShow.getWidget();
+      if (widget instanceof RequiresResize) {
+        ((RequiresResize) widget).onResize();
+      }
+    }
+
+    for (SubPanel panel : widget2Panels.values()) {
+      if (panel.getView() instanceof RequiresResize) {
+        ((RequiresResize) panel.getView()).onResize();
+      }
+    }
+  }
+
+  @Override
+  public void onAddTabButtonClicked(int mouseX, int mouseY) {
+    delegate.onAddTabButtonClicked(mouseX, mouseY);
+  }
+
+  @Override
+  public void initialState() {
+    Collection<DebugPartPresenter> parts =
+        debugPartPresenterManager.getInitialDebugPartPresenters();
+    int numberOfPanels = parts.size();
+    Iterator<DebugPartPresenter> iterator = parts.iterator();
+    if (iterator.hasNext()) {
+      loadPart(iterator, masterSubPanel, numberOfPanels);
+    }
+  }
+
+  private void loadPart(
+      Iterator<DebugPartPresenter> iterator, SubPanel subPanel, int numberOfPanels) {
+    Scheduler scheduler = Scheduler.get();
+    scheduler.scheduleDeferred(
+        () -> {
+          DebugPartPresenter part = iterator.next();
+          AcceptsOneWidget container =
+              new AcceptsOneWidget() {
+
+                @Override
+                public void setWidget(IsWidget w) {
+                  addWidget(subPanel, part.getTitle(), part.getTitleImage(), w, true);
+                }
+              };
+          part.go(container);
+          if (iterator.hasNext()) {
+            double width = (numberOfPanels - 1.0) / numberOfPanels;
+            loadPart(iterator, subPanel.splitVertically(width), numberOfPanels - 1);
           }
-        };
-
-    return SimpleList.create(
-        (SimpleList.View) frameElement,
-        coreRes.defaultSimpleListCss(),
-        new FrameItemRender(),
-        frameListEventDelegate);
+        });
   }
 }
