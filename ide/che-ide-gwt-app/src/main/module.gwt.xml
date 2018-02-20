@@ -13,4 +13,5 @@
 -->
 <module>
     <entry-point class="org.eclipse.che.ide.client.IDE"/>
+    <collapse-all-properties />  
 </module>
