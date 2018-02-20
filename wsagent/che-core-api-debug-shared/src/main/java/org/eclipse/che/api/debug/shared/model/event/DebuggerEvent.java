@@ -17,6 +17,7 @@ public interface DebuggerEvent {
   enum TYPE {
     SUSPEND,
     DISCONNECT,
-    BREAKPOINT_ACTIVATED
+    BREAKPOINT_ACTIVATED,
+    CONSOLE
   }
 }

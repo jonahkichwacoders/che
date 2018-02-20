@@ -80,4 +80,9 @@ public class DspDebugger extends AbstractDebugger {
             params.getOrDefault("target", params.getOrDefault("name", "Debug Server Protocol")));
     return new DebuggerDescriptor("DSP", userFriendlyishName);
   }
+
+  @Override
+  public boolean supportsConsole() {
+    return true;
+  }
 }

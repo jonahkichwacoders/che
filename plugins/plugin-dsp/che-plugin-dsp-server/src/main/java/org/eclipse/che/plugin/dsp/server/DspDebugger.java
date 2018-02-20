@@ -51,10 +51,10 @@ import org.eclipse.che.api.debug.shared.model.impl.SimpleValueImpl;
 import org.eclipse.che.api.debug.shared.model.impl.StackFrameDumpImpl;
 import org.eclipse.che.api.debug.shared.model.impl.ThreadStateImpl;
 import org.eclipse.che.api.debug.shared.model.impl.VariableImpl;
+import org.eclipse.che.api.debug.shared.model.impl.event.ConsoleEventImpl;
 import org.eclipse.che.api.debug.shared.model.impl.event.DisconnectEventImpl;
 import org.eclipse.che.api.debug.shared.model.impl.event.SuspendEventImpl;
 import org.eclipse.che.api.debugger.server.Debugger;
-import org.eclipse.che.api.debugger.server.Debugger.DebuggerCallback;
 import org.eclipse.che.api.debugger.server.exceptions.DebuggerException;
 import org.eclipse.lsp4j.debug.BreakpointEventArguments;
 import org.eclipse.lsp4j.debug.Capabilities;
@@ -62,12 +62,16 @@ import org.eclipse.lsp4j.debug.ConfigurationDoneArguments;
 import org.eclipse.lsp4j.debug.ContinueArguments;
 import org.eclipse.lsp4j.debug.ContinuedEventArguments;
 import org.eclipse.lsp4j.debug.DisconnectArguments;
+import org.eclipse.lsp4j.debug.EvaluateArguments;
+import org.eclipse.lsp4j.debug.EvaluateArgumentsContext;
+import org.eclipse.lsp4j.debug.EvaluateResponse;
 import org.eclipse.lsp4j.debug.ExitedEventArguments;
 import org.eclipse.lsp4j.debug.InitializeRequestArguments;
 import org.eclipse.lsp4j.debug.LoadedSourceEventArguments;
 import org.eclipse.lsp4j.debug.ModuleEventArguments;
 import org.eclipse.lsp4j.debug.NextArguments;
 import org.eclipse.lsp4j.debug.OutputEventArguments;
+import org.eclipse.lsp4j.debug.OutputEventArgumentsCategory;
 import org.eclipse.lsp4j.debug.ProcessEventArguments;
 import org.eclipse.lsp4j.debug.Scope;
 import org.eclipse.lsp4j.debug.ScopesArguments;
@@ -89,6 +93,8 @@ import org.eclipse.lsp4j.debug.services.IDebugProtocolClient;
 import org.eclipse.lsp4j.debug.services.IDebugProtocolServer;
 import org.eclipse.lsp4j.jsonrpc.Launcher;
 import org.eclipse.lsp4j.jsonrpc.MessageConsumer;
+import org.eclipse.lsp4j.jsonrpc.ResponseErrorException;
+import org.eclipse.lsp4j.jsonrpc.messages.ResponseError;
 import org.eclipse.lsp4j.jsonrpc.validation.ReflectiveMessageValidator;
 
 public class DspDebugger implements Debugger, IDebugProtocolClient {
@@ -655,8 +661,25 @@ public class DspDebugger implements Debugger, IDebugProtocolClient {
 
   @Override
   public void output(OutputEventArguments args) {
-    // TODO Auto-generated method stub
+    String output = args.getOutput();
+    if (args.getCategory() == null) {
+      displayInConsole(output);
+    }
+    switch (args.getCategory()) {
+      case OutputEventArgumentsCategory.CONSOLE:
+      case OutputEventArgumentsCategory.STDOUT:
+      case OutputEventArgumentsCategory.STDERR:
+        displayInConsole(output);
+        break;
+      case OutputEventArgumentsCategory.TELEMETRY:
+      default:
+        // Ignore
+        break;
+    }
+  }
 
+  private void displayInConsole(String output) {
+    debuggerCallback.onEvent(new ConsoleEventImpl(output));
   }
 
   @Override
@@ -680,5 +703,43 @@ public class DspDebugger implements Debugger, IDebugProtocolClient {
   public void process(ProcessEventArguments args) {
     // TODO Auto-generated method stub
 
+  }
+
+  @Override
+  public void executeCommand(String command) {
+    String trimmed = command.trim();
+    if (!trimmed.isEmpty()) {
+      displayInConsole(trimmed + System.lineSeparator());
+      EvaluateArguments args = new EvaluateArguments();
+      args.setContext(EvaluateArgumentsContext.REPL);
+      try {
+        DspStackFrameDump dspStackFrameDump = getDspStackFrameDump(getCurrentThreadId(), 0);
+        args.setFrameId(dspStackFrameDump.getFrameId());
+      } catch (DebuggerException e) {
+        // TODO can't get frame id -- the id needs to come from front end
+        e.printStackTrace();
+      }
+      args.setExpression(trimmed);
+      CompletableFuture<EvaluateResponse> future = debugProtocolServer.evaluate(args);
+      future
+          .thenAcceptAsync(
+              response -> {
+                if (response != null && response.getResult() != null) {
+                  String result = response.getResult() + System.lineSeparator();
+                  displayInConsole(result);
+                }
+              })
+          .exceptionally(
+              (t) -> {
+                if (t.getCause() != null && t.getCause() instanceof ResponseErrorException) {
+                  ResponseErrorException exception = (ResponseErrorException) t.getCause();
+                  ResponseError error = exception.getResponseError();
+                  displayInConsole(error.getMessage() + System.lineSeparator());
+                } else {
+                  displayInConsole(t.getLocalizedMessage() + System.lineSeparator());
+                }
+                return null;
+              });
+    }
   }
 }

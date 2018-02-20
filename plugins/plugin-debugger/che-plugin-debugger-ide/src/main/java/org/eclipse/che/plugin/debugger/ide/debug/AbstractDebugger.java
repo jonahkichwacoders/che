@@ -26,9 +26,11 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 import javax.validation.constraints.NotNull;
+import org.eclipse.che.agent.exec.shared.dto.event.ConnectedEventDto;
 import org.eclipse.che.api.core.jsonrpc.commons.RequestHandlerConfigurator;
 import org.eclipse.che.api.core.jsonrpc.commons.RequestHandlerManager;
 import org.eclipse.che.api.core.jsonrpc.commons.RequestTransmitter;
+import org.eclipse.che.api.core.jsonrpc.commons.reception.MethodNameConfigurator;
 import org.eclipse.che.api.debug.shared.dto.BreakpointConfigurationDto;
 import org.eclipse.che.api.debug.shared.dto.BreakpointDto;
 import org.eclipse.che.api.debug.shared.dto.DebugSessionDto;
@@ -45,6 +47,7 @@ import org.eclipse.che.api.debug.shared.dto.action.StepOutActionDto;
 import org.eclipse.che.api.debug.shared.dto.action.StepOverActionDto;
 import org.eclipse.che.api.debug.shared.dto.action.SuspendActionDto;
 import org.eclipse.che.api.debug.shared.dto.event.BreakpointActivatedEventDto;
+import org.eclipse.che.api.debug.shared.dto.event.ConsoleEventDto;
 import org.eclipse.che.api.debug.shared.dto.event.DisconnectEventDto;
 import org.eclipse.che.api.debug.shared.dto.event.SuspendEventDto;
 import org.eclipse.che.api.debug.shared.model.Breakpoint;
@@ -57,6 +60,7 @@ import org.eclipse.che.api.debug.shared.model.StackFrameDump;
 import org.eclipse.che.api.debug.shared.model.Variable;
 import org.eclipse.che.api.debug.shared.model.VariablePath;
 import org.eclipse.che.api.debug.shared.model.action.Action;
+import org.eclipse.che.api.debug.shared.model.event.ConsoleEvent;
 import org.eclipse.che.api.debug.shared.model.event.DebuggerEvent;
 import org.eclipse.che.api.debug.shared.model.impl.BreakpointImpl;
 import org.eclipse.che.api.debug.shared.model.impl.LocationImpl;
@@ -97,6 +101,7 @@ public abstract class AbstractDebugger implements Debugger, DebuggerObservable {
   public static final String EVENT_DEBUGGER_MESSAGE_BREAKPOINT = "event:debugger:breakpoint";
   public static final String EVENT_DEBUGGER_MESSAGE_DISCONNECT = "event:debugger:disconnect";
   public static final String EVENT_DEBUGGER_MESSAGE_SUSPEND = "event:debugger:suspend";
+  public static final String EVENT_DEBUGGER_MESSAGE_CONSOLE = "event:debugger:console";
   public static final String EVENT_DEBUGGER_UN_SUBSCRIBE = "event:debugger:un-subscribe";
   public static final String EVENT_DEBUGGER_SUBSCRIBE = "event:debugger:subscribe";
 
@@ -234,6 +239,9 @@ public abstract class AbstractDebugger implements Debugger, DebuggerObservable {
       case DISCONNECT:
         disconnect();
         return;
+      case CONSOLE:
+        console(((ConsoleEventDto) event).getConsoleText());
+        return;
       default:
         Log.error(
             AbstractDebugger.class, "Unknown debuggerType of debugger event: " + event.getType());
@@ -249,6 +257,23 @@ public abstract class AbstractDebugger implements Debugger, DebuggerObservable {
     }
     invalidateDisposableBreakpoint();
     preserveDebuggerState();
+  }
+
+  private void console(String consoleText) {
+    for (DebuggerObserver observer : observers) {
+      observer.onConsole(consoleText);
+    }
+  }
+
+  @Override
+  public void executeCommand(String command) {
+    if (isConnected()) {
+      Promise<Void> promise = service.executeCommand(debugSessionDto.getId(), command);
+      promise.catchError(
+          error -> {
+            Log.error(AbstractDebugger.class, error.getCause());
+          });
+    }
   }
 
   private void open(Location location) {
@@ -313,8 +338,8 @@ public abstract class AbstractDebugger implements Debugger, DebuggerObservable {
     }
 
     if (!requestHandlerManager.isRegistered(EVENT_DEBUGGER_MESSAGE_BREAKPOINT)) {
-      configurator
-          .newConfiguration()
+      MethodNameConfigurator newConfiguration = configurator.newConfiguration();
+      newConfiguration
           .methodName(EVENT_DEBUGGER_MESSAGE_BREAKPOINT)
           .paramsAsDto(BreakpointActivatedEventDto.class)
           .noResult()
@@ -323,6 +348,21 @@ public abstract class AbstractDebugger implements Debugger, DebuggerObservable {
                 Log.debug(
                     getClass(),
                     "Received breakpoint activated message from endpoint: " + endpointId);
+                onEventListReceived(event);
+              });
+    }
+
+    if (!requestHandlerManager.isRegistered(EVENT_DEBUGGER_MESSAGE_CONSOLE)) {
+      MethodNameConfigurator newConfiguration = configurator.newConfiguration();
+      newConfiguration
+          .methodName(EVENT_DEBUGGER_MESSAGE_CONSOLE)
+          .paramsAsDto(ConsoleEventDto.class)
+          .noResult()
+          .withBiConsumer(
+              (endpointId, event) -> {
+                Log.debug(
+                    getClass(),
+                    "Received console message from endpoint: " + endpointId);
                 onEventListReceived(event);
               });
     }

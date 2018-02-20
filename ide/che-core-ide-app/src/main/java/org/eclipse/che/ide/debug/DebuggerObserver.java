@@ -23,6 +23,8 @@ public interface DebuggerObserver {
   /** Event happens when debugger client disconnected from the server. */
   void onDebuggerDisconnected();
 
+  default void onConsole(String consoleText) {};
+
   /** Event happens when breakpoint added. */
   void onBreakpointAdded(Breakpoint breakpoint);
 

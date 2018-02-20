@@ -28,6 +28,7 @@ import org.eclipse.che.api.debug.shared.dto.ThreadStateDto;
 import org.eclipse.che.api.debug.shared.dto.VariableDto;
 import org.eclipse.che.api.debug.shared.dto.VariablePathDto;
 import org.eclipse.che.api.debug.shared.dto.event.BreakpointActivatedEventDto;
+import org.eclipse.che.api.debug.shared.dto.event.ConsoleEventDto;
 import org.eclipse.che.api.debug.shared.dto.event.DebuggerEventDto;
 import org.eclipse.che.api.debug.shared.dto.event.DisconnectEventDto;
 import org.eclipse.che.api.debug.shared.dto.event.SuspendEventDto;
@@ -44,6 +45,7 @@ import org.eclipse.che.api.debug.shared.model.ThreadState;
 import org.eclipse.che.api.debug.shared.model.Variable;
 import org.eclipse.che.api.debug.shared.model.VariablePath;
 import org.eclipse.che.api.debug.shared.model.event.BreakpointActivatedEvent;
+import org.eclipse.che.api.debug.shared.model.event.ConsoleEvent;
 import org.eclipse.che.api.debug.shared.model.event.DebuggerEvent;
 import org.eclipse.che.api.debug.shared.model.event.SuspendEvent;
 
@@ -192,6 +194,10 @@ public final class DtoConverter {
         return newDto(BreakpointActivatedEventDto.class)
             .withType(DebuggerEvent.TYPE.BREAKPOINT_ACTIVATED)
             .withBreakpoint(asDto(((BreakpointActivatedEvent) debuggerEvent).getBreakpoint()));
+      case CONSOLE:
+        return newDto(ConsoleEventDto.class)
+            .withType(DebuggerEvent.TYPE.CONSOLE)
+            .withConsoleText(((ConsoleEvent) debuggerEvent).getConsoleText());
       default:
         throw new IllegalArgumentException(
             "Illegal event type " + debuggerEvent.getType().toString());

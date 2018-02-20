@@ -248,4 +248,6 @@ public interface Debugger {
   interface DebuggerCallback {
     void onEvent(DebuggerEvent event);
   }
+
+  default void executeCommand(String command) throws DebuggerException {}
 }

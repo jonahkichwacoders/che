@@ -18,6 +18,8 @@ import org.eclipse.che.ide.api.extension.ExtensionGinModule;
 import org.eclipse.che.plugin.dsp.ide.configuration.DspConfigurationPageView;
 import org.eclipse.che.plugin.dsp.ide.configuration.DspConfigurationPageViewImpl;
 import org.eclipse.che.plugin.dsp.ide.configuration.DspConfigurationType;
+import org.eclipse.che.plugin.dsp.ide.debug.panel.console.ConsolePanelView;
+import org.eclipse.che.plugin.dsp.ide.debug.panel.console.ConsolePanelViewImpl;
 
 @ExtensionGinModule
 public class DspGinModule extends AbstractGinModule {
@@ -27,5 +29,6 @@ public class DspGinModule extends AbstractGinModule {
         .addBinding()
         .to(DspConfigurationType.class);
     bind(DspConfigurationPageView.class).to(DspConfigurationPageViewImpl.class).in(Singleton.class);
+    bind(ConsolePanelView.class).to(ConsolePanelViewImpl.class).in(Singleton.class);
   }
 }

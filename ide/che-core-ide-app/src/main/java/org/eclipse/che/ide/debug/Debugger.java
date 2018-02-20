@@ -125,6 +125,16 @@ public interface Debugger extends DebuggerObservable {
    */
   void setValue(Variable variable, long threadId, int frameIndex);
 
+  /**
+   * Indicates if the debugger supports a console view and therefore may generate {@link
+   * DebuggerObserver#onConsole(String)} messages.
+   */
+  default boolean supportsConsole() {
+    return false;
+  }
+
+  void executeCommand(String command);
+
   /** Indicates if connection is established with the server. */
   boolean isConnected();
 

@@ -199,6 +199,12 @@ public class DebuggerServiceClientImpl implements DebuggerServiceClient {
   }
 
   @Override
+  public Promise<Void> executeCommand(String id, String command) {
+    String requestUrl = getBaseUrl(id) + "/execute";
+    return asyncRequestFactory.createPutRequest(requestUrl, command).send();
+  }
+
+  @Override
   public Promise<String> evaluate(String id, String expression, long threadId, int frameIndex) {
     String requestUrl = getBaseUrl(id) + "/evaluation?thread=" + threadId + "&frame=" + frameIndex;
     String params = "&expression=" + URL.encodeQueryString(expression);

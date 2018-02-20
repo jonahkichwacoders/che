@@ -241,6 +241,16 @@ public class DebuggerService {
     }
   }
 
+  @PUT
+  @Path("{id}/execute")
+  @Consumes(MediaType.APPLICATION_JSON)
+  public void execute(
+      @PathParam("id") String sessionId,
+      String command)
+      throws DebuggerException {
+    debuggerManager.getDebugger(sessionId).executeCommand(command);
+  }
+
   @GET
   @Path("{id}/evaluation")
   @Produces(MediaType.TEXT_PLAIN)

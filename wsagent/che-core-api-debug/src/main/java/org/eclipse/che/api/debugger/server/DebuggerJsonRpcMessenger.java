@@ -25,9 +25,11 @@ import org.eclipse.che.api.core.notification.EventService;
 import org.eclipse.che.api.core.notification.EventSubscriber;
 import org.eclipse.che.api.debug.shared.dto.BreakpointDto;
 import org.eclipse.che.api.debug.shared.dto.event.BreakpointActivatedEventDto;
+import org.eclipse.che.api.debug.shared.dto.event.ConsoleEventDto;
 import org.eclipse.che.api.debug.shared.dto.event.DisconnectEventDto;
 import org.eclipse.che.api.debug.shared.dto.event.SuspendEventDto;
 import org.eclipse.che.api.debug.shared.model.event.BreakpointActivatedEvent;
+import org.eclipse.che.api.debug.shared.model.event.ConsoleEvent;
 import org.eclipse.che.api.debug.shared.model.event.DebuggerEvent;
 import org.eclipse.che.api.debug.shared.model.event.SuspendEvent;
 
@@ -37,6 +39,7 @@ public class DebuggerJsonRpcMessenger implements EventSubscriber<DebuggerMessage
   private static final String EVENT_DEBUGGER_MESSAGE_BREAKPOINT = "event:debugger:breakpoint";
   private static final String EVENT_DEBUGGER_MESSAGE_DISCONNECT = "event:debugger:disconnect";
   private static final String EVENT_DEBUGGER_MESSAGE_SUSPEND = "event:debugger:suspend";
+  private static final String EVENT_DEBUGGER_MESSAGE_CONSOLE = "event:debugger:console";
   private static final String EVENT_DEBUGGER_UN_SUBSCRIBE = "event:debugger:un-subscribe";
   private static final String EVENT_DEBUGGER_SUBSCRIBE = "event:debugger:subscribe";
 
@@ -106,6 +109,21 @@ public class DebuggerJsonRpcMessenger implements EventSubscriber<DebuggerMessage
                     .endpointId(it)
                     .methodName(EVENT_DEBUGGER_MESSAGE_DISCONNECT)
                     .paramsAsDto(disconnectEvent)
+                    .sendAndSkipResult());
+        break;
+      case CONSOLE:
+        String consoleText = ((ConsoleEvent) event.getDebuggerEvent()).getConsoleText();
+        final ConsoleEventDto consoleEvent =
+            newDto(ConsoleEventDto.class)
+                .withType(DebuggerEvent.TYPE.CONSOLE)
+                .withConsoleText(consoleText);
+        endpointIds.forEach(
+            it ->
+                transmitter
+                    .newRequest()
+                    .endpointId(it)
+                    .methodName(EVENT_DEBUGGER_MESSAGE_CONSOLE)
+                    .paramsAsDto(consoleEvent)
                     .sendAndSkipResult());
         break;
       default:
