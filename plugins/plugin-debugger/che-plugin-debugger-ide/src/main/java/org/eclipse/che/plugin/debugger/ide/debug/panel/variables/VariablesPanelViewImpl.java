@@ -109,6 +109,7 @@ public class VariablesPanelViewImpl extends BaseView<VariablesPanelView.ActionDe
     for (Variable variable : variables) {
       VariableNode node = nodeFactory.createVariableNode(variable);
       tree.getNodeStorage().add(node);
+      tree.setExpanded(node, true);
     }
   }
 
