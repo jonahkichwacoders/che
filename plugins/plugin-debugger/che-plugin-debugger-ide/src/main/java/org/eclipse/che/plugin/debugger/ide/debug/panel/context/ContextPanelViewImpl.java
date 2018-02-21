@@ -113,7 +113,7 @@ public class ContextPanelViewImpl extends BaseView<ContextPanelView.ActionDelega
   @Override
   public long getSelectedThreadId() {
     String selectedValue = threads.getSelectedValue();
-    return selectedValue == null ? -1 : Integer.parseInt(selectedValue);
+    return selectedValue == null ? -1 : Long.parseLong(selectedValue);
   }
 
   @Override
@@ -127,7 +127,7 @@ public class ContextPanelViewImpl extends BaseView<ContextPanelView.ActionDelega
 
   @UiHandler({"threads"})
   void onThreadChanged(ChangeEvent event) {
-    delegate.onSelectedThread(Integer.parseInt(threads.getSelectedValue()));
+    delegate.onSelectedThread(Long.parseLong(threads.getSelectedValue()));
   }
 
   public void onListItemClicked(Element itemElement, StackFrameDump itemData) {
