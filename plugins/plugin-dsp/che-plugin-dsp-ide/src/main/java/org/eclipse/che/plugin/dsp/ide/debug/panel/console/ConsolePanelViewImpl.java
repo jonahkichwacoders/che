@@ -11,18 +11,18 @@
 package org.eclipse.che.plugin.dsp.ide.debug.panel.console;
 
 import static com.google.gwt.event.dom.client.KeyCodes.KEY_ENTER;
-
+import org.eclipse.che.ide.Resources;
+import org.eclipse.che.ide.api.parts.base.BaseView;
+import org.eclipse.che.plugin.debugger.ide.DebuggerResources;
 import com.google.gwt.event.dom.client.KeyUpEvent;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.uibinder.client.UiHandler;
 import com.google.gwt.user.client.ui.Label;
+import com.google.gwt.user.client.ui.ScrollPanel;
 import com.google.gwt.user.client.ui.TextBox;
 import com.google.gwt.user.client.ui.Widget;
 import com.google.inject.Inject;
-import org.eclipse.che.ide.Resources;
-import org.eclipse.che.ide.api.parts.base.BaseView;
-import org.eclipse.che.plugin.debugger.ide.DebuggerResources;
 
 public class ConsolePanelViewImpl extends BaseView<ConsolePanelView.ActionDelegate>
     implements ConsolePanelView {
@@ -31,6 +31,7 @@ public class ConsolePanelViewImpl extends BaseView<ConsolePanelView.ActionDelega
   @UiField(provided = true)
   Resources coreRes;
 
+  @UiField ScrollPanel scrollPanel;
   @UiField Label outputText;
 
   @UiField TextBox inputText;
@@ -46,6 +47,7 @@ public class ConsolePanelViewImpl extends BaseView<ConsolePanelView.ActionDelega
   @Override
   public void setOutputText(String text) {
     outputText.setText(text);
+    scrollPanel.scrollToBottom();
   }
 
   @UiHandler("inputText")

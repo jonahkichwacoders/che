@@ -34,7 +34,9 @@
                     <g:TextBox width="100%" ui:field="inputText" debugId="debug-console-input-text" addStyleNames="{style.inputText}"/>
                 </g:south>
                 <g:center>
-                    <g:Label ui:field="outputText" debugId="debug-console-output-text" addStyleNames="{style.outputText}"/>
+                    <g:ScrollPanel ui:field="scrollPanel">
+                        <g:Label ui:field="outputText" debugId="debug-console-output-text" addStyleNames="{style.outputText}"/>
+                    </g:ScrollPanel>
                 </g:center>
             </g:DockLayoutPanel>
         </g:FlowPanel>
