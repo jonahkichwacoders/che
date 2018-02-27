@@ -17,8 +17,9 @@ public interface DebugPartPresenterManager {
    * Register a view that can be opened from the Add menu in the Debug part.
    *
    * @param presenter part presenter for the debug view
+   * @param openInitially whether to open this part in the Debug area initially
    */
-  void registerDebugPartPresenter(DebugPartPresenter presenter);
+  void registerDebugPartPresenter(DebugPartPresenter presenter, boolean openInitially);
 
   /**
    * Returns a map of registered debug views.

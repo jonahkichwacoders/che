@@ -10,33 +10,51 @@
  */
 package org.eclipse.che.plugin.debugger.ide.debug;
 
-import com.google.inject.Inject;
+import static java.util.stream.Collectors.collectingAndThen;
+import static java.util.stream.Collectors.toList;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import org.eclipse.che.ide.api.debug.DebugPartPresenter;
 import org.eclipse.che.ide.api.debug.DebugPartPresenterManager;
+import com.google.inject.Inject;
 
 public class DebugPartPresenterManagerImpl implements DebugPartPresenterManager {
+  private static class PartInfo {
+    DebugPartPresenter part;
+    boolean openInitially;
 
-  Collection<DebugPartPresenter> registeredParts = new ArrayList<>();
+    public PartInfo(DebugPartPresenter part, boolean openInitially) {
+      this.part = part;
+      this.openInitially = openInitially;
+    }
+  }
+
+  Collection<PartInfo> registeredParts = new ArrayList<>();
 
   @Inject
   public DebugPartPresenterManagerImpl() {}
 
   @Override
-  public void registerDebugPartPresenter(DebugPartPresenter presenter) {
-    registeredParts.add(presenter);
+  public void registerDebugPartPresenter(DebugPartPresenter presenter, boolean openInitially) {
+    PartInfo partInfo = new PartInfo(presenter, openInitially);
+    registeredParts.add(partInfo);
   }
 
   @Override
   public Collection<DebugPartPresenter> getDebugPartPresenters() {
-    return Collections.unmodifiableCollection(registeredParts);
+    return registeredParts
+        .stream()
+        .map(partInfo -> partInfo.part)
+        .collect(collectingAndThen(toList(), Collections::unmodifiableList));
   }
 
   @Override
   public Collection<DebugPartPresenter> getInitialDebugPartPresenters() {
-    // TODO new API to set this up for real
-    return Collections.unmodifiableCollection(registeredParts);
+    return registeredParts
+        .stream()
+        .filter(partInfo -> partInfo.openInitially)
+        .map(partInfo -> partInfo.part)
+        .collect(collectingAndThen(toList(), Collections::unmodifiableList));
   }
 }

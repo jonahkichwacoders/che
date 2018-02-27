@@ -259,8 +259,8 @@ public class DebuggerExtension {
           .addKey(new KeyBuilder().alt().charCode('5').build(), SHOW_HIDE_DEBUGGER_PANEL_ID);
     }
 
-    debugPartPresenterManager.registerDebugPartPresenter(breakpointsPanelPresenter);
-    debugPartPresenterManager.registerDebugPartPresenter(contextPanelPresenter);
-    debugPartPresenterManager.registerDebugPartPresenter(variablesPanelPresenter);
+    debugPartPresenterManager.registerDebugPartPresenter(breakpointsPanelPresenter, true);
+    debugPartPresenterManager.registerDebugPartPresenter(contextPanelPresenter, true);
+    debugPartPresenterManager.registerDebugPartPresenter(variablesPanelPresenter, true);
   }
 }
