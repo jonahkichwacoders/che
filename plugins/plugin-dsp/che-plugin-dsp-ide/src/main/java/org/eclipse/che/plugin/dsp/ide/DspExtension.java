@@ -29,6 +29,6 @@ public class DspExtension {
       DebugPartPresenterManager debugPartPresenterManager,
       ConsolePanelPresenter consolePanelPresenter) {
     debuggerManager.registeredDebugger(DspDebugger.ID, dspDebugger);
-    debugPartPresenterManager.registerDebugPartPresenter(consolePanelPresenter);
+    debugPartPresenterManager.registerDebugPartPresenter(consolePanelPresenter, false);
   }
 }
