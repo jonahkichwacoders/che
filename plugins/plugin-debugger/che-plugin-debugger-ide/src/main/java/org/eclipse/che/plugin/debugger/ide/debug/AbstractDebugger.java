@@ -26,7 +26,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 import javax.validation.constraints.NotNull;
-import org.eclipse.che.agent.exec.shared.dto.event.ConnectedEventDto;
 import org.eclipse.che.api.core.jsonrpc.commons.RequestHandlerConfigurator;
 import org.eclipse.che.api.core.jsonrpc.commons.RequestHandlerManager;
 import org.eclipse.che.api.core.jsonrpc.commons.RequestTransmitter;
@@ -60,7 +59,6 @@ import org.eclipse.che.api.debug.shared.model.StackFrameDump;
 import org.eclipse.che.api.debug.shared.model.Variable;
 import org.eclipse.che.api.debug.shared.model.VariablePath;
 import org.eclipse.che.api.debug.shared.model.action.Action;
-import org.eclipse.che.api.debug.shared.model.event.ConsoleEvent;
 import org.eclipse.che.api.debug.shared.model.event.DebuggerEvent;
 import org.eclipse.che.api.debug.shared.model.impl.BreakpointImpl;
 import org.eclipse.che.api.debug.shared.model.impl.LocationImpl;
@@ -360,9 +358,7 @@ public abstract class AbstractDebugger implements Debugger, DebuggerObservable {
           .noResult()
           .withBiConsumer(
               (endpointId, event) -> {
-                Log.debug(
-                    getClass(),
-                    "Received console message from endpoint: " + endpointId);
+                Log.debug(getClass(), "Received console message from endpoint: " + endpointId);
                 onEventListReceived(event);
               });
     }

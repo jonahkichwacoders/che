@@ -27,7 +27,6 @@ import org.eclipse.che.api.debug.shared.model.Variable;
 import org.eclipse.che.ide.debug.Debugger;
 import org.eclipse.che.ide.debug.DebuggerManager;
 import org.eclipse.che.plugin.debugger.ide.BaseTest;
-import org.eclipse.che.plugin.debugger.ide.debug.DebuggerPresenter;
 import org.eclipse.che.plugin.debugger.ide.debug.dialogs.DebuggerDialogFactory;
 import org.eclipse.che.plugin.debugger.ide.debug.dialogs.common.TextAreaDialogView;
 import org.eclipse.che.plugin.debugger.ide.debug.panel.variables.VariablesPanelPresenter;
@@ -70,7 +69,8 @@ public class ChangeValuePresenterTest extends BaseTest {
     when(debugger.isSuspended()).thenReturn(true);
 
     presenter =
-        new ChangeValuePresenter(dialogFactory, constants, debuggerManager, variablesPanelPresenter);
+        new ChangeValuePresenter(
+            dialogFactory, constants, debuggerManager, variablesPanelPresenter);
   }
 
   @Test

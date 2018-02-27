@@ -25,9 +25,7 @@ public class ConsoleEventImpl extends DebuggerEventImpl implements ConsoleEvent 
 
     ConsoleEventImpl that = (ConsoleEventImpl) o;
 
-    return !(text != null
-        ? !text.equals(that.text)
-        : that.text != null);
+    return !(text != null ? !text.equals(that.text) : that.text != null);
   }
 
   @Override

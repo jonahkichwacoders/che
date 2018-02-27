@@ -78,7 +78,6 @@ public class ConsolePanelPresenter extends BasePresenter
         activeDebugger.executeCommand(command);
       }
     }
-
   }
 
   @Override
