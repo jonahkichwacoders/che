@@ -10,9 +10,9 @@
  */
 package org.eclipse.che.plugin.dsp.ide.debug.panel.console;
 
+import com.google.gwt.user.client.ui.AcceptsOneWidget;
 import org.eclipse.che.ide.api.mvp.View;
 import org.eclipse.che.ide.api.parts.base.BaseActionDelegate;
-import com.google.gwt.user.client.ui.AcceptsOneWidget;
 
 public interface ConsolePanelView extends View<ConsolePanelView.ActionDelegate> {
 

@@ -11,9 +11,7 @@
 package org.eclipse.che.plugin.dsp.ide.debug.panel.console;
 
 import static com.google.gwt.event.dom.client.KeyCodes.KEY_ENTER;
-import org.eclipse.che.ide.Resources;
-import org.eclipse.che.ide.api.parts.base.BaseView;
-import org.eclipse.che.plugin.debugger.ide.DebuggerResources;
+
 import com.google.gwt.event.dom.client.KeyUpEvent;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
@@ -24,6 +22,9 @@ import com.google.gwt.user.client.ui.IsWidget;
 import com.google.gwt.user.client.ui.TextBox;
 import com.google.gwt.user.client.ui.Widget;
 import com.google.inject.Inject;
+import org.eclipse.che.ide.Resources;
+import org.eclipse.che.ide.api.parts.base.BaseView;
+import org.eclipse.che.plugin.debugger.ide.DebuggerResources;
 
 public class ConsolePanelViewImpl extends BaseView<ConsolePanelView.ActionDelegate>
     implements ConsolePanelView {
@@ -57,7 +58,7 @@ public class ConsolePanelViewImpl extends BaseView<ConsolePanelView.ActionDelega
 
   @Override
   public AcceptsOneWidget getOutputConsoleContainer() {
-    return new AcceptsOneWidget(){
+    return new AcceptsOneWidget() {
 
       @Override
       public void setWidget(IsWidget w) {

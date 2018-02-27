@@ -1,13 +1,13 @@
 package org.eclipse.che.plugin.dsp.ide.debug.panel.console;
 
 import static com.google.gwt.regexp.shared.RegExp.compile;
-import org.apache.tools.ant.taskdefs.Exec;
+
+import com.google.gwt.regexp.shared.MatchResult;
+import com.google.gwt.regexp.shared.RegExp;
 import org.eclipse.che.ide.api.app.AppContext;
 import org.eclipse.che.ide.api.editor.EditorAgent;
 import org.eclipse.che.ide.console.AbstractOutputCustomizer;
 import org.eclipse.che.ide.resource.Path;
-import com.google.gwt.regexp.shared.MatchResult;
-import com.google.gwt.regexp.shared.RegExp;
 
 public class GDBPanelOutputCustomizer extends AbstractOutputCustomizer {
 

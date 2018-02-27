@@ -12,12 +12,13 @@ package org.eclipse.che.plugin.debugger.ide.debug;
 
 import static java.util.stream.Collectors.collectingAndThen;
 import static java.util.stream.Collectors.toList;
+
+import com.google.inject.Inject;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import org.eclipse.che.ide.api.debug.DebugPartPresenter;
 import org.eclipse.che.ide.api.debug.DebugPartPresenterManager;
-import com.google.inject.Inject;
 
 public class DebugPartPresenterManagerImpl implements DebugPartPresenterManager {
   private static class PartInfo {

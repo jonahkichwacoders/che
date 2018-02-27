@@ -10,12 +10,10 @@
  */
 package org.eclipse.che.plugin.dsp.ide.debug.panel.console;
 
-import com.google.gwt.i18n.client.DateTimeFormat;
 import com.google.gwt.user.client.ui.AcceptsOneWidget;
 import com.google.gwt.user.client.ui.IsWidget;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
-import java.util.Date;
 import org.eclipse.che.api.debug.shared.model.Breakpoint;
 import org.eclipse.che.api.debug.shared.model.Location;
 import org.eclipse.che.api.debug.shared.model.Variable;
@@ -61,7 +59,8 @@ public class ConsolePanelPresenter extends BasePresenter
     this.constant = constant;
     this.debuggerManager = debuggerManager;
     this.outputConsole = (DefaultOutputConsole) consoleFactory.create("Output");
-    this.outputConsole.setCustomizer(new CompoundOutputCustomizer(new GDBPanelOutputCustomizer(appContext, editorAgent)));
+    this.outputConsole.setCustomizer(
+        new CompoundOutputCustomizer(new GDBPanelOutputCustomizer(appContext, editorAgent)));
     this.outputConsole.addActionDelegate(this);
 
     this.view.setDelegate(this);
