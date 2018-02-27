@@ -18,8 +18,9 @@ import com.google.gwt.event.dom.client.KeyUpEvent;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.uibinder.client.UiHandler;
-import com.google.gwt.user.client.ui.Label;
-import com.google.gwt.user.client.ui.ScrollPanel;
+import com.google.gwt.user.client.ui.AcceptsOneWidget;
+import com.google.gwt.user.client.ui.FlowPanel;
+import com.google.gwt.user.client.ui.IsWidget;
 import com.google.gwt.user.client.ui.TextBox;
 import com.google.gwt.user.client.ui.Widget;
 import com.google.inject.Inject;
@@ -31,8 +32,7 @@ public class ConsolePanelViewImpl extends BaseView<ConsolePanelView.ActionDelega
   @UiField(provided = true)
   Resources coreRes;
 
-  @UiField ScrollPanel scrollPanel;
-  @UiField Label outputText;
+  @UiField FlowPanel outputPanel;
 
   @UiField TextBox inputText;
 
@@ -44,14 +44,8 @@ public class ConsolePanelViewImpl extends BaseView<ConsolePanelView.ActionDelega
     setContentWidget(uiBinder.createAndBindUi(this));
   }
 
-  @Override
-  public void setOutputText(String text) {
-    outputText.setText(text);
-    scrollPanel.scrollToBottom();
-  }
-
   @UiHandler("inputText")
-  void maybeTriggerSave(KeyUpEvent event) {
+  void maybeExecuteCommand(KeyUpEvent event) {
     if (event.getNativeKeyCode() == KEY_ENTER) {
       String command = inputText.getText().trim();
       if (!command.isEmpty()) {
@@ -59,5 +53,16 @@ public class ConsolePanelViewImpl extends BaseView<ConsolePanelView.ActionDelega
       }
       inputText.setText("");
     }
+  }
+
+  @Override
+  public AcceptsOneWidget getOutputConsoleContainer() {
+    return new AcceptsOneWidget(){
+
+      @Override
+      public void setWidget(IsWidget w) {
+        outputPanel.add(w);
+      }
+    };
   }
 }

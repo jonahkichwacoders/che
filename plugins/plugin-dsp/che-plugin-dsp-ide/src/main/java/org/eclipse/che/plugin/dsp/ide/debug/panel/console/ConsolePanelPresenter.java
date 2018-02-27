@@ -10,15 +10,23 @@
  */
 package org.eclipse.che.plugin.dsp.ide.debug.panel.console;
 
+import com.google.gwt.i18n.client.DateTimeFormat;
 import com.google.gwt.user.client.ui.AcceptsOneWidget;
 import com.google.gwt.user.client.ui.IsWidget;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
+import java.util.Date;
 import org.eclipse.che.api.debug.shared.model.Breakpoint;
 import org.eclipse.che.api.debug.shared.model.Location;
 import org.eclipse.che.api.debug.shared.model.Variable;
+import org.eclipse.che.ide.api.app.AppContext;
 import org.eclipse.che.ide.api.debug.DebugPartPresenter;
+import org.eclipse.che.ide.api.editor.EditorAgent;
+import org.eclipse.che.ide.api.outputconsole.OutputConsole;
 import org.eclipse.che.ide.api.parts.base.BasePresenter;
+import org.eclipse.che.ide.console.CommandConsoleFactory;
+import org.eclipse.che.ide.console.CompoundOutputCustomizer;
+import org.eclipse.che.ide.console.DefaultOutputConsole;
 import org.eclipse.che.ide.debug.Debugger;
 import org.eclipse.che.ide.debug.DebuggerDescriptor;
 import org.eclipse.che.ide.debug.DebuggerManager;
@@ -28,22 +36,33 @@ import org.eclipse.che.plugin.dsp.ide.DspLocalizationConstant;
 
 @Singleton
 public class ConsolePanelPresenter extends BasePresenter
-    implements ConsolePanelView.ActionDelegate, DebuggerManagerObserver, DebugPartPresenter {
+    implements ConsolePanelView.ActionDelegate,
+        OutputConsole.ActionDelegate,
+        DebuggerManagerObserver,
+        DebugPartPresenter {
   private static final String TITLE = "Console";
   private final DebuggerManager debuggerManager;
   private final DspLocalizationConstant constant;
   private final ConsolePanelView view;
   private StringBuilder outputText = new StringBuilder();
+  private DefaultOutputConsole outputConsole;
+  private boolean clearInfoMessage = false;
 
   @Inject
   public ConsolePanelPresenter(
-      final ConsolePanelView view,
-      final DspLocalizationConstant constant,
-      final DebuggerManager debuggerManager,
-      final DebuggerLocationHandlerManager resourceHandlerManager) {
+      ConsolePanelView view,
+      DspLocalizationConstant constant,
+      DebuggerManager debuggerManager,
+      DebuggerLocationHandlerManager resourceHandlerManager,
+      CommandConsoleFactory consoleFactory,
+      AppContext appContext,
+      EditorAgent editorAgent) {
     this.view = view;
     this.constant = constant;
     this.debuggerManager = debuggerManager;
+    this.outputConsole = (DefaultOutputConsole) consoleFactory.create("Output");
+    this.outputConsole.setCustomizer(new CompoundOutputCustomizer(new GDBPanelOutputCustomizer(appContext, editorAgent)));
+    this.outputConsole.addActionDelegate(this);
 
     this.view.setDelegate(this);
 
@@ -67,6 +86,8 @@ public class ConsolePanelPresenter extends BasePresenter
 
   @Override
   public void go(AcceptsOneWidget container) {
+    AcceptsOneWidget outputConsoleContainer = view.getOutputConsoleContainer();
+    outputConsole.go(outputConsoleContainer);
     container.setWidget(view);
   }
 
@@ -82,22 +103,56 @@ public class ConsolePanelPresenter extends BasePresenter
 
   @Override
   public void onConsole(String text) {
+    if (clearInfoMessage) {
+      outputConsole.clearOutputsButtonClicked();
+      clearInfoMessage = false;
+    }
     outputText.append(text);
-    view.setOutputText(outputText.toString());
+    outputConsole.printText(text);
   }
 
   @Override
   public void onActiveDebuggerChanged(Debugger activeDebugger) {
     outputText = new StringBuilder();
+    outputConsole.clearOutputsButtonClicked();
+    clearInfoMessage = true;
     if (activeDebugger == null) {
-      view.setOutputText("No active debug session.");
+      outputConsole.printText("No active debug session.");
     } else if (activeDebugger.supportsConsole()) {
-      view.setOutputText("Debug session started. Output will appear here.");
+      outputConsole.printText("Debug session started. Output will appear here.");
     } else {
-      view.setOutputText(
+      outputConsole.printText(
           "Debug session started. Current debugger does not support the console view.");
     }
   }
+
+  @Override
+  public void onConsoleOutput(OutputConsole console) {}
+
+  @Override
+  public void onDownloadOutput(OutputConsole console) {
+    download("debug.log", outputText.toString());
+  }
+
+  /**
+   * Invokes the browser to download a file.
+   *
+   * @param fileName file name
+   * @param text file content
+   */
+  private native void download(String fileName, String text) /*-{
+		var element = $doc.createElement('a');
+		element.setAttribute('href', 'data:text/plain;charset=utf-8,'
+				+ encodeURIComponent(text));
+		element.setAttribute('download', fileName);
+
+		element.style.display = 'none';
+		$doc.body.appendChild(element);
+
+		element.click();
+
+		$doc.body.removeChild(element);
+  }-*/;
 
   @Override
   public void onDebuggerAttached(DebuggerDescriptor debuggerDescriptor) {}
