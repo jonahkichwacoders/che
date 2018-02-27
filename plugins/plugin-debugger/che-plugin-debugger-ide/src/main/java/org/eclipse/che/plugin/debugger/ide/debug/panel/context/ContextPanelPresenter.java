@@ -204,6 +204,7 @@ public class ContextPanelPresenter extends BasePresenter
     if (debugger != null) {
       debugger.setDebugContext(-1, -1);
     }
+    clearView();
   }
 
   @Override
