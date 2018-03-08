@@ -1,19 +1,19 @@
 {
-  "title": "Eclipse Che ",
-  "name": "Eclipse Che",
-  "logoFile": "che-logo.svg",
-  "logoTextFile": "che-logo-text.svg",
+  "title": "e2cloud ",
+  "name": "e2cloud",
+  "logoFile": "e2cloud-logo.svg",
+  "logoTextFile": "e2cloud-logo-text.svg",
   "favicon": "favicon.ico",
-  "loader": "loader.svg",
+  "loader": "intro-Renesas_blue.png",
   "ideResources": "/_app/",
   "websocketContext": "/api/websocket",
-  "helpPath": "https://www.eclipse.org/che/",
-  "helpTitle": "Community",
-  "supportEmail": "wish@codenvy.com",
+  "helpPath": "https://www.renesas.com/e2cloud/",
+  "helpTitle": "Renesas Support",
+  "supportEmail": "e2cloud@renesas.com",
   "oauthDocs": "Configure OAuth in the che.properties file.",
   "workspace": {
-    "priorityStacks": ["Java", "Java-MySQL", "Blank"],
-    "defaultStack": "java-mysql"
+    "priorityStacks": ["rzg-default", "debug-adapters-default", "cpp-default"],
+    "defaultStack": "rzg-default"
   },
   "cli" : {
     "configName" : "che.env",
