@@ -15,7 +15,7 @@
     "problems": [],
     "source": {
       "type": "git",
-      "location": "https://github.com/jonahkichwacoders/e2cloud-sample-console-c-simple.git",
+      "location": "https://github.com/jonahkichwacoders/renesas-cloud-sample-console-c-simple.git",
       "parameters": {}
     },
     "commands": [],
@@ -24,7 +24,6 @@
     "tags": [
       "cpp",
       "gcc",
-      "e2cloud",
       "renesas"
     ]
   },
@@ -44,7 +43,7 @@
     "problems": [],
     "source": {
       "type": "git",
-      "location": "https://github.com/jonahkichwacoders/e2cloud-sample-blinky.git",
+      "location": "https://github.com/jonahkichwacoders/renesas-cloud-sample-blinky.git",
       "parameters": {}
     },
     "commands": [],
@@ -53,7 +52,6 @@
     "tags": [
       "cpp",
       "gcc",
-      "e2cloud",
       "renesas"
     ]
   },
@@ -73,7 +71,7 @@
     "problems": [],
     "source": {
       "type": "git",
-      "location": "https://github.com/jonahkichwacoders/e2cloud-sample-cam-cap.git",
+      "location": "https://github.com/jonahkichwacoders/renesas-cloud-sample-cam-cap.git",
       "parameters": {}
     },
     "commands": [],
@@ -82,7 +80,6 @@
     "tags": [
       "cpp",
       "gcc",
-      "e2cloud",
       "renesas"
     ]
   }

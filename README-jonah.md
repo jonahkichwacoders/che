@@ -12,13 +12,13 @@ git clone https://github.com/jonahkichwacoders/lsp4j.git
 mvn -f releng install
 
 # Eclipse Che Dependencies
-git clone --branch dsp6 https://github.com/jonahkichwacoders/che-dependencies.git
+git clone --branch renesascloud_mar_2017 https://github.com/jonahkichwacoders/che-dependencies.git
 mvn -f che-dependencies clean install
 ```
 3. Build Che:
 ```
 # Clone
-git clone --branch dsp6 https://github.com/jonahkichwacoders/che.git
+git clone --branch renesascloud_mar_2017 https://github.com/jonahkichwacoders/che.git
 time ( mvn install)  2>&1 | ts
 ```
 4. Run Che:
